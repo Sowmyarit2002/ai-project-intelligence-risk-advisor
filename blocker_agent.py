@@ -1,49 +1,129 @@
-def identify_blockers_and_actions(text):
-    blockers = []
-    action_items = []
-    pending_decisions = []
 
-    blocker_keywords = [
-        "blocked", "blocker", "unresolved",
-        "issue", "unable to proceed", "waiting for",
-        "bug", "delayed", "delay", "dependency",
-        "not available", "not completed", "prevents",
-        "still pending", "configuration is pending"
-    ]
 
-    decision_keywords = [
-        "pending decision", "decision pending",
-        "awaiting approval", "pending approval",
-        "approval is pending", "not been approved",
-        "must decide", "decision"
-    ]
+import re
 
-    action_keywords = [
-        "action item", "will complete", "must complete",
-        "assigned to", "responsible for", "follow up",
-        "fix", "complete", "obtain", "rerun",
-        "review", "must", "should", "team:"
-    ]
 
-    for line in text.splitlines():
-        clean = line.strip()
+RECORD_PATTERN = re.compile(
+    r"^\s*(?:[-*•]\s*)?"
+    r"(?P<record_id>[ABRTD]\d+)\s*[—–-]\s*"
+    r"(?P<description>.*)$",
+    re.IGNORECASE
+)
 
-        if not clean:
+HEADING_PATTERN = re.compile(
+    r"^[A-Z][A-Z\s&/:-]{3,}$"
+)
+
+
+def extract_records(text):
+    """Extract ID-based records and their continuation lines."""
+
+    records = []
+    current = None
+
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+
+        if not line:
             continue
 
-        lower = clean.lower()
+        match = RECORD_PATTERN.match(line)
 
-        if any(word in lower for word in blocker_keywords):
-            blockers.append(clean)
+        if match:
+            if current:
+                records.append(current)
 
-        if any(word in lower for word in decision_keywords):
-            pending_decisions.append(clean)
+            current = {
+                "id": match.group("record_id").upper(),
+                "description": match.group("description").strip()
+            }
+            continue
 
-        if any(word in lower for word in action_keywords):
-            action_items.append(clean)
+        # Stop collecting when a new section heading appears.
+        if HEADING_PATTERN.match(line):
+            if current:
+                records.append(current)
+                current = None
+            continue
 
-    return {
-        "blockers": list(dict.fromkeys(blockers)),
-        "pending_decisions": list(dict.fromkeys(pending_decisions)),
-        "action_items": list(dict.fromkeys(action_items))
+        # Ignore unrelated text before the first identified record.
+        if current:
+            current["description"] += " " + line
+
+    if current:
+        records.append(current)
+
+    return records
+
+
+def is_pending_decision(description):
+    """Identify explicit unresolved decisions."""
+
+    text = description.lower()
+
+    patterns = [
+        r"\bpending decision\b",
+        r"\bdecision is needed\b",
+        r"\bdecision pending\b",
+        r"\bdecide whether\b",
+        r"\bdecision on whether\b",
+        r"\bwhether .{0,100}\bwill be included\b",
+    ]
+
+    return any(
+        re.search(pattern, text)
+        for pattern in patterns
+    )
+
+
+def identify_blockers_and_actions(text):
+    """
+    Extract blockers, pending decisions and action items.
+
+    B-series: blockers or unresolved decisions.
+    A-series: action items.
+    Other record types are excluded.
+    """
+
+    result = {
+        "blockers": [],
+        "pending_decisions": [],
+        "action_items": []
     }
+
+    if not isinstance(text, str) or not text.strip():
+        return result
+
+    records = extract_records(text)
+
+    for record in records:
+        record_id = record["id"]
+        description = record["description"]
+
+        if not description:
+            continue
+
+        formatted_record = f"{record_id} — {description}"
+
+        if record_id.startswith("B"):
+            if is_pending_decision(description):
+                result["pending_decisions"].append(
+                    formatted_record
+                )
+            else:
+                result["blockers"].append(
+                    formatted_record
+                )
+
+        elif record_id.startswith("A"):
+            result["action_items"].append(
+                formatted_record
+            )
+
+    # Remove duplicate records while preserving order.
+    for category in result:
+        result[category] = list(
+            dict.fromkeys(result[category])
+        )
+
+    return result

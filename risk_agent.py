@@ -1,4 +1,11 @@
+
+
 import re
+
+
+# --------------------------------------------------
+# RISK DETECTION PATTERNS
+# --------------------------------------------------
 
 RISK_PATTERNS = {
     "Schedule Delay": [
@@ -8,7 +15,9 @@ RISK_PATTERNS = {
         "overdue",
         "missed deadline",
         "postponed",
+        "timeline slippage",
     ],
+
     "Dependency Risk": [
         "depends on",
         "dependency",
@@ -16,83 +25,252 @@ RISK_PATTERNS = {
         "waiting for",
         "blocked by",
         "pending approval",
+        "external dependency",
     ],
+
     "Delivery Challenge": [
         "may not finish",
         "at risk",
         "shortage",
         "insufficient time",
         "resource unavailable",
+        "delivery challenge",
+        "delivery risk",
+        "may miss",
+        "false positive",
+        "false positives",
+        "miss risks",
+        "flag sentences",
+        "overstate certainty",
+        "incomplete evidence",
+        "source evidence is incomplete",
+        "unvalidated",
+        "not validated",
+        "needs further validation",
     ],
 }
 
-# Ordinary software setup instructions (ignored unless a risk keyword is present).
-SETUP_PHRASES = (
-    "must be installed",
-    "install the library",
-    "installation requirement",
-    "pdf extraction library",
-    "python-docx",
+
+# --------------------------------------------------
+# RECORD IDENTIFICATION
+# --------------------------------------------------
+
+RECORD_PATTERN = re.compile(
+    r"^\s*(?:[-*•]\s*)?"
+    r"(?P<record_id>[ABRTD]\d+)\s*[—–-]\s*"
+    r"(?P<description>.*)$",
+    re.IGNORECASE
 )
 
-# Compile whole-word/phrase regexes once.
+HEADING_PATTERN = re.compile(
+    r"^[A-Z][A-Z\s&/:-]{3,}$"
+)
+
+
+# --------------------------------------------------
+# COMPILE PATTERNS
+# --------------------------------------------------
+
 COMPILED_PATTERNS = {
     risk_type: [
-        (kw, re.compile(r"\b" + re.escape(kw).replace(r"\ ", r"\s+") + r"\b"))
-        for kw in keywords
+        (
+            keyword,
+            re.compile(
+                r"\b" +
+                re.escape(keyword).replace(r"\ ", r"\s+") +
+                r"\b",
+                re.IGNORECASE
+            )
+        )
+        for keyword in keywords
     ]
     for risk_type, keywords in RISK_PATTERNS.items()
 }
 
-BULLET_PREFIX = re.compile(r"^[\-\*\u2022\u2023\u25E6\d\.\)\s]+(?=\S)")
+
+def extract_risk_records(text):
+    """Extract explicitly numbered project records."""
+
+    records = []
+    current = None
+
+    for raw_line in text.splitlines():
+
+        line = raw_line.strip()
+
+        if not line:
+            continue
+
+        match = RECORD_PATTERN.match(line)
+
+        if match:
+
+            if current:
+                records.append(current)
+
+            current = {
+                "id": match.group("record_id").upper(),
+                "description": match.group("description").strip()
+            }
+
+            continue
+
+        if HEADING_PATTERN.match(line):
+
+            if current:
+                records.append(current)
+                current = None
+
+            continue
+
+        if current:
+            current["description"] += " " + line
+
+    if current:
+        records.append(current)
+
+    return records
+
+
+def classify_risk(description):
+    """Identify risk categories from evidence."""
+
+    normalized = re.sub(
+        r"\s+",
+        " ",
+        description
+    ).strip().casefold()
+
+    matches = {}
+
+    for risk_type, patterns in COMPILED_PATTERNS.items():
+
+        found = [
+            keyword
+            for keyword, regex in patterns
+            if regex.search(normalized)
+        ]
+
+        if found:
+            matches[risk_type] = found
+
+    return matches
 
 
 def detect_project_risks(text):
-    """Return one risk card per category with unique evidence lines."""
+    """
+    Detect project risks using explicit R-series records
+    and keyword-based evidence.
+
+    Ignores B-series, A-series, T-series and D-series records.
+    """
+
     if not isinstance(text, str) or not text.strip():
         return []
 
     grouped_risks = {
-        risk_type: {"evidence": [], "matched_keywords": []}
+        risk_type: {
+            "evidence": [],
+            "matched_keywords": []
+        }
         for risk_type in RISK_PATTERNS
     }
 
-    seen_lines = set()
+    seen_evidence = set()
 
-    for line in text.splitlines():
-        clean = re.sub(r"\s+", " ", line).strip()
+    def add_risk(risk_type, evidence, keywords):
+
+        normalized = re.sub(
+            r"\s+",
+            " ",
+            evidence
+        ).strip().casefold()
+
+        if not normalized or normalized in seen_evidence:
+            return
+
+        seen_evidence.add(normalized)
+
+        details = grouped_risks[risk_type]
+
+        details["evidence"].append(evidence)
+
+        for keyword in keywords:
+            if keyword not in details["matched_keywords"]:
+                details["matched_keywords"].append(keyword)
+
+    # --------------------------------------------------
+    # 1. PROCESS EXPLICITLY NUMBERED RECORDS
+    # --------------------------------------------------
+
+    records = extract_risk_records(text)
+
+    for record in records:
+
+        record_id = record["id"]
+        description = record["description"]
+
+        # Only R-series records are accepted as explicit risks.
+        if not record_id.startswith("R"):
+            continue
+
+        if not description:
+            continue
+
+        matches = classify_risk(description)
+
+        if matches:
+
+            for risk_type, keywords in matches.items():
+
+                add_risk(
+                    risk_type,
+                    f"{record_id} — {description}",
+                    keywords
+                )
+
+        else:
+
+            # An explicitly documented R-series item is still
+            # a risk even if no known keyword matches.
+            add_risk(
+                "Delivery Challenge",
+                f"{record_id} — {description}",
+                ["explicit risk record"]
+            )
+
+    # --------------------------------------------------
+    # 2. PROCESS UNNUMBERED RISK EVIDENCE
+    # --------------------------------------------------
+
+    for raw_line in text.splitlines():
+
+        clean = re.sub(
+            r"\s+",
+            " ",
+            raw_line
+        ).strip()
+
         if not clean:
             continue
 
-        normalized = BULLET_PREFIX.sub("", clean).casefold()
-
-        # Skip identical lines appearing more than once.
-        if normalized in seen_lines:
-            continue
-        seen_lines.add(normalized)
-
-        matches = {}
-        for risk_type, patterns in COMPILED_PATTERNS.items():
-            found = [kw for kw, rx in patterns if rx.search(normalized)]
-            if found:
-                matches[risk_type] = found
-
-        if not matches:
+        # Ignore all numbered records here.
+        if RECORD_PATTERN.match(clean):
             continue
 
-        # Ignore setup instructions only when they carry no genuine risk signal.
-        # (Here a risk keyword exists, so keep the line unless it is pure setup text
-        # with no schedule/dependency context.)
-        is_setup = any(phrase in normalized for phrase in SETUP_PHRASES)
-        if is_setup and not _has_real_risk_signal(matches):
-            continue
+        matches = classify_risk(clean)
 
-        for risk_type, found in matches.items():
-            details = grouped_risks[risk_type]
-            details["evidence"].append(clean)
-            for kw in found:
-                if kw not in details["matched_keywords"]:
-                    details["matched_keywords"].append(kw)
+        for risk_type, keywords in matches.items():
+
+            add_risk(
+                risk_type,
+                clean,
+                keywords
+            )
+
+    # --------------------------------------------------
+    # 3. RETURN RESULTS IN THE EXISTING FORMAT
+    # --------------------------------------------------
 
     return [
         {
@@ -103,10 +281,3 @@ def detect_project_risks(text):
         for risk_type, details in grouped_risks.items()
         if details["evidence"]
     ]
-
-
-def _has_real_risk_signal(matches):
-    """A setup line still counts if it mentions delay or blocking terms."""
-    strong = {"delayed", "delay", "overdue", "missed deadline",
-              "postponed", "blocked by", "behind schedule"}
-    return any(kw in strong for kws in matches.values() for kw in kws)
