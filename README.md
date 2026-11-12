@@ -1,85 +1,86 @@
 AI Project Intelligence & Risk Advisor
-
-An AI-driven platform for project document analysis, risk identification, and project management support.
-
+Development of AI-Driven Enterprise Project Intelligence & Risk Management Platform
+An AI-powered project intelligence and risk management platform developed as part of the Infosys Springboard Internship.
+The application helps project teams analyze project documents, extract important project information, identify risks and blockers, generate project documentation, evaluate project health, and interact with project information through a conversational assistant.
+---
 Project Overview
-
-Software development teams and student project groups often struggle with incomplete planning, missed deadlines, unresolved blockers, and scattered project documentation. Reviewing proposals, meeting notes, project plans, and progress updates manually can make it difficult to identify important information and potential risks.
-
-The AI Project Intelligence & Risk Advisor aims to simplify this process by extracting useful information from project documents, searching relevant content, and identifying project scope, risks, blockers, and action items.
-
-This project is being developed as part of the Infosys Springboard internship project, Development of AI-Driven Enterprise Project Intelligence & Risk Management Platform.
-
-Objectives
-
-- Ingest and process project documents in multiple formats.
-- Convert extracted text into manageable chunks for search and analysis.
-- Generate embeddings to support semantic document search.
-- Extract project goals, deliverables, milestones, timelines, and responsibilities.
-- Identify potential project risks and supporting evidence.
-- Detect blockers, pending decisions, and action items.
-- Validate the application using sample project documents and test cases.
-
-Features Implemented
-
-Milestone 1: Document Ingestion and Search
-
-- Upload project documents in PDF, DOCX, CSV, and TXT formats.
-- Extract text from supported documents.
-- Split extracted text into smaller chunks.
-- Generate embeddings for document chunks.
-- Store document chunks for retrieval.
-- Search project documents using semantic similarity.
-- Display relevant search results through a Streamlit interface.
-
-Milestone 2: Project Intelligence Agents
-
-1. Scope and Deliverables Agent ("scope_agent.py")
-
-Identifies project information such as:
-
-- Project goals and objectives
-- Deliverables
-- Milestones and timelines
-- Roles and responsibilities
-
-2. Risk Detection Agent ("risk_agent.py")
-
-Identifies potential project risks from document content, including:
-
-- Schedule and deadline risks
-- Dependency-related concerns
-- Delivery challenges
-- Supporting text and matched keywords
-
-3. Blocker and Action Item Agent ("blocker_agent.py")
-
-Extracts information related to:
-
-- Project blockers and unresolved issues
-- Pending decisions
-- Action items and follow-up activities
-
-The current agents use rule-based or keyword-matching logic where applicable. Their outputs should be validated against the original documents and are intended to support, not replace, human project decisions.
-
+The AI Project Intelligence & Risk Advisor is designed to simplify project monitoring and management by combining document processing, semantic search, specialized project intelligence agents, and Retrieval-Augmented Generation (RAG).
+Users can upload project documents in PDF, DOCX, CSV, and TXT formats. The platform processes the uploaded information and provides structured project insights through an interactive Streamlit application.
+Key Features
+Milestone 1 – Document Ingestion and Semantic Search
+Upload documents in PDF, DOCX, CSV, and TXT formats.
+Extract text from uploaded documents.
+Split extracted content into smaller text chunks.
+Generate text embeddings using Sentence Transformers.
+Store document chunks and embeddings in ChromaDB.
+Perform semantic search to retrieve relevant project information.
+Milestone 2 – Project Intelligence Agents
+1. Scope & Deliverables Extraction Agent
+Extract project goals and objectives.
+Identify project deliverables.
+Extract milestones and timelines.
+Identify project responsibilities.
+2. Risk Detection & Delivery Forecasting Agent
+Identify potential project risks.
+Detect schedule and dependency-related risks.
+Display supporting evidence for identified risks.
+3. Blocker & Action Item Identification Agent
+Identify project blockers.
+Extract pending decisions.
+Identify action items requiring attention.
+Milestone 3 – Documentation Generation, Project Health Scoring & Conversational Intelligence
+1. Documentation Generation Agent
+Generate project user stories.
+Generate structured risk registers.
+Generate project action-item lists.
+Use extracted project information to prepare management documentation.
+2. Project Health Scoring
+Calculate an overall project health score.
+Evaluate scope health.
+Evaluate timeline health.
+Evaluate blocker-related health.
+Display a dimension-wise project health breakdown.
+3. Conversational Project Intelligence Assistant
+Answer project-related questions using uploaded project documents.
+Retrieve relevant information through semantic search.
+Provide context-based answers.
+Display supporting evidence for answer verification.
+4. Testing and Validation
+Test individual agents using dedicated test scripts.
+Validate document ingestion across supported formats.
+Evaluate documentation generation and health scoring.
+Test conversational responses for relevance and accuracy.
+---
 Technology Stack
-
-- Programming language: Python
-- User interface: Streamlit
-- Document processing: PDF, DOCX, CSV, and TXT text extraction
-- Text processing: Chunking and preprocessing
-- Semantic search: Embeddings and vector-based retrieval
-- Testing: Python test scripts and automated tests where configured
-- Version control: Git and GitHub
-- Development environment: Visual Studio Code
-
+Technology	Purpose
+Python	Core application development
+Streamlit	Interactive web application
+Sentence Transformers	Text embedding generation
+all-MiniLM-L6-v2	Embedding model
+ChromaDB	Vector database
+PyPDF	PDF text extraction
+python-docx	DOCX document processing
+Pandas	CSV processing and data handling
+RAG	Context-based information retrieval
+---
+System Architecture
+The application follows a modular architecture:
+Document Upload: Users upload project documents.
+Document Ingestion: Extract text from supported document formats.
+Text Chunking: Divide extracted content into smaller chunks.
+Embedding Generation: Convert text chunks into vector embeddings.
+Vector Storage: Store embeddings and associated metadata in ChromaDB.
+Semantic Retrieval: Retrieve relevant project information.
+Project Intelligence Agents: Analyze scope, risks, blockers, and action items.
+Documentation Generation: Generate user stories, risk registers, and action lists.
+Project Health Assessment: Calculate and display project health scores.
+Conversational Assistant: Answer questions using retrieved project information.
+---
 Project Structure
-
-The main project files include:
-
 ai-project-intelligence-risk-advisor/
 │
 ├── app.py
+│
 ├── ingestion.py
 ├── chunking.py
 ├── embedding.py
@@ -89,117 +90,89 @@ ai-project-intelligence-risk-advisor/
 ├── risk_agent.py
 ├── blocker_agent.py
 │
+├── documentation_agent.py
+├── health_score.py
+├── conversational_agent.py
+│
 ├── test_embedding.py
 ├── test_vector_store.py
 ├── test_scope_agent.py
 ├── test_risk_agent.py
 ├── test_blocker_agent.py
+├── test_documentation_agent.py
+├── test_health_score.py
+├── test_conversational_agent.py
 │
-├── .gitignore
+├── requirements.txt
 ├── README.md
-└── requirements.txt
+├── LICENSE
+└── .gitignore
 
-Note: The structure above describes the expected main files. Keep the README aligned with the files actually present in the repository. Add "requirements.txt" if it does not yet exist.
-
+---
 Installation and Setup
-
 Prerequisites
-
-- Python 3.12 or another compatible Python version
-- Visual Studio Code
-- Git
-- Internet access for installing required Python packages
-
-1. Clone the repository
-
+Python 3.10 or a compatible supported Python version.
+Git.
+Visual Studio Code (recommended).
+1. Clone the Repository
 git clone https://github.com/Sowmyarit2002/ai-project-intelligence-risk-advisor.git
 
-2. Open the project directory
-
+2. Navigate to the Project Directory
 cd ai-project-intelligence-risk-advisor
 
-3. Create a virtual environment
-
-Windows PowerShell:
-
+3. Create a Virtual Environment
 python -m venv .venv
 
-4. Install dependencies
+4. Activate the Virtual Environment
+For Windows PowerShell:
+.\.venv\Scripts\Activate.ps1
 
-If the repository contains a complete "requirements.txt" file:
+5. Install Dependencies
+pip install -r requirements.txt
 
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+6. Run the Application
+python -m streamlit run app.py
 
-If dependencies are not listed yet, install the packages required by the current source files and document-processing libraries before running the application.
-
-5. Run the application
-
-.\.venv\Scripts\python.exe -m streamlit run app.py
-
-Streamlit will display a local URL in the terminal, usually:
-
-http://localhost:8501
-
-Open that URL in your browser to use the application.
-
-How to Use
-
-1. Start the Streamlit application.
-2. Upload a supported project document.
-3. Allow the application to extract the document text and create chunks and embeddings.
-4. Enter a search query to retrieve relevant project information.
-5. Use the Scope and Deliverables module to review project scope information.
-6. Use the Risk Detection module to inspect potential risks and their supporting evidence.
-7. Use the Blockers and Actions module to review unresolved issues, pending decisions, and action items.
-8. Compare the results with the source documents to validate their accuracy.
-
+The application will open in your default web browser.
+---
 Testing
+The project contains individual test scripts for validating its core components.
+Test File	Testing Area
+test_embedding.py	Embedding generation
+test_vector_store.py	Vector storage and retrieval
+test_scope_agent.py	Scope and deliverable extraction
+test_risk_agent.py	Project risk detection
+test_blocker_agent.py	Blocker and action identification
+test_documentation_agent.py	Documentation generation
+test_health_score.py	Project health calculation
+test_conversational_agent.py	Conversational question answering
+Run an individual test using:
+python test_scope_agent.py
 
-The repository contains test scripts for the embedding, vector-store, scope, risk, and blocker components.
-
-To run the tests using "pytest", install it if necessary and execute:
-
-.\.venv\Scripts\python.exe -m pytest -v
-
-Review test results and investigate any failures before treating the corresponding feature as validated. Also test document ingestion and the Streamlit workflow using representative PDF, DOCX, CSV, and TXT files.
-
-Current Limitations
-
-- Risk and blocker detection may rely on keywords and predefined rules, which can produce false positives or miss relevant information.
-- Extracted results depend on the quality, formatting, and completeness of the uploaded documents.
-- Delivery forecasts and risk assessments should not be treated as guaranteed predictions.
-- Human review is required before acting on extracted risks, decisions, or action items.
-- Support for additional document formats and more advanced AI-based analysis can be added in future development.
-
-Future Enhancements
-
-- Improve risk prioritization using likelihood and impact scores.
-- Enhance extraction of dates, dependencies, task owners, and project status.
-- Add more robust evaluation datasets and automated test coverage.
-- Improve cross-document analysis and source traceability.
-- Introduce advanced AI or LLM-based analysis where appropriate.
-- Develop more detailed project dashboards and reporting features.
-
-Project Status
-
-- Milestone 1: Document ingestion, chunking, embeddings, vector storage, and semantic search.
-- Milestone 2: Scope and deliverable extraction, risk detection, and blocker/action-item identification.
-
-The project is under active development. Features and evaluation methods may evolve as additional milestones are completed.
-
-Author
-
-Sowmyarit Padhy
-
-B.Tech — Information Technology
-
-KIIT, Bhubaneswar, Odisha, India
-
+Replace the filename to run another test.
+Testing should be evaluated against the actual source documents. Extraction accuracy and conversational relevance may vary depending on document structure and content.
+---
+Current Project Status
+Milestone	Deliverables	Status
+Milestone 1	Document ingestion, chunking, embeddings, semantic search	Implemented
+Milestone 2	Scope extraction, risk detection, blocker identification	Implemented
+Milestone 3	Documentation generation, health scoring, conversational assistant	Implemented
+---
+Limitations and Future Enhancements
+Improve scanned PDF support through OCR.
+Improve risk detection and reduce false positives.
+Enhance retrieval accuracy across multiple documents.
+Improve conversational answer relevance and evidence quality.
+Improve duplicate document handling.
+Expand project health assessment capabilities.
+---
 Repository
-
-"GitHub: AI Project Intelligence & Risk Advisor" (https://github.com/Sowmyarit2002/ai-project-intelligence-risk-advisor)
-
+GitHub: https://github.com/Sowmyarit2002/ai-project-intelligence-risk-advisor
 License
+This project is licensed under the MIT License. See the LICENSE file for more information.
+---
+Developed as part of the Infosys Springboard Internship Project.
 
-This project includes an MIT License in the repository. Refer to the "LICENSE" file for the applicable terms.
+
+
 
