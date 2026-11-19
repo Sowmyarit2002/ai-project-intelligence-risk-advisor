@@ -5,7 +5,13 @@ import streamlit as st
 from ingestion import extract_text
 from chunking import split_text
 from embedding import generate_embeddings
-from vector_store import store_chunks, search_chunks
+from vector_store import (
+    store_chunks,
+    search_chunks,
+    append_chunks,
+    get_chunk_count,
+    list_document_names,
+)
 
 from scope_agent import extract_scope_and_deliverables
 from risk_agent import detect_project_risks
@@ -500,6 +506,123 @@ div[data-testid="stChatInput"] textarea:focus {
     color: var(--text) !important;
     -webkit-text-fill-color: var(--text) !important;
 }
+
+/* ---------- Milestone 4: Insights dashboard ---------- */
+.dash-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 1.2rem 1.3rem;
+    box-shadow: var(--shadow);
+    margin-bottom: .9rem;
+}
+
+.gauge-card {
+    text-align: center;
+}
+
+.gauge {
+    width: 160px;
+    height: 160px;
+    margin: .2rem auto .8rem;
+    border-radius: 50%;
+    background: conic-gradient(var(--clr) calc(var(--pct) * 1%), #E4E8FB 0);
+    display: grid;
+    place-items: center;
+}
+
+.gauge-inner {
+    width: 122px;
+    height: 122px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.gauge-inner .gv {
+    font-family: 'Sora', sans-serif;
+    font-size: 2.4rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text);
+}
+
+.gauge-inner small {
+    color: var(--muted);
+    font-size: .75rem;
+    margin-top: .2rem;
+}
+
+.gauge-status {
+    font-family: 'Sora', sans-serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.gauge-label {
+    color: var(--muted);
+    font-size: .85rem;
+}
+
+.dim {
+    margin-bottom: .9rem;
+}
+
+.dim-top {
+    display: flex;
+    justify-content: space-between;
+    font-size: .9rem;
+    margin-bottom: .3rem;
+    color: var(--text);
+}
+
+.dim-track {
+    height: 10px;
+    border-radius: 999px;
+    background: #E4E8FB;
+    overflow: hidden;
+}
+
+.dim-fill {
+    height: 100%;
+    border-radius: 999px;
+}
+
+.risk-row {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--rose);
+    border-radius: 14px;
+    padding: .8rem 1rem;
+    margin-bottom: .6rem;
+    box-shadow: var(--shadow);
+}
+
+.risk-row .risk-title {
+    font-family: 'Sora', sans-serif;
+    font-weight: 600;
+    font-size: .95rem;
+    color: #C72A52;
+    margin-bottom: .25rem;
+}
+
+.risk-row .risk-ev {
+    color: var(--text);
+    font-size: .9rem;
+    line-height: 1.5;
+}
+
+.dash-title {
+    font-family: 'Sora', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    margin: .4rem 0 .7rem;
+    color: var(--text);
+}
 </style>
 """
 
@@ -585,19 +708,44 @@ def display_evidence_item(item):
 # SIDEBAR
 # --------------------------------------------------
 
+def actual_chunk_count():
+    """
+    Number of chunk records in ChromaDB that belong to the documents
+    processed in this session (chunks left over from earlier sessions
+    are not counted, so the number matches 'Documents processed').
+    """
+
+    try:
+        count = sum(
+            get_chunk_count(name)
+            for name in st.session_state.processed_documents
+        )
+    except Exception:
+        return st.session_state.total_chunks
+
+    st.session_state.total_chunks = count
+    return count
+
+
+def render_sidebar_stats(slot):
+    slot.markdown(
+        stat_tile(
+            "Documents processed",
+            len(st.session_state.processed_documents)
+        )
+        + '<div style="height:.7rem"></div>'
+        + stat_tile("Chunks stored", actual_chunk_count()),
+        unsafe_allow_html=True,
+    )
+
+
 with st.sidebar:
     st.markdown("### 📊 Project Intelligence")
     st.caption("Your documents, searched and analyzed.")
     st.divider()
 
-    docs_count = len(st.session_state.processed_documents)
-
-    st.markdown(
-        stat_tile("Documents processed", docs_count)
-        + '<div style="height:.7rem"></div>'
-        + stat_tile("Chunks stored", st.session_state.total_chunks),
-        unsafe_allow_html=True,
-    )
+    sidebar_stats_slot = st.empty()
+    render_sidebar_stats(sidebar_stats_slot)
 
     st.divider()
     st.markdown("**Analyses completed**")
@@ -731,7 +879,7 @@ if st.button("Process Documents", type="primary"):
                     f"Could not process {uploaded_file.name}: {error}"
                 )
 
-        st.session_state.total_chunks += total_chunks
+        render_sidebar_stats(sidebar_stats_slot)
 
         st.success(
             f"Processing finished. Documents processed: {processed_count}. "
@@ -740,10 +888,270 @@ if st.button("Process Documents", type="primary"):
 
 
 # --------------------------------------------------
+# MODULE 1B: INCREMENTAL UPDATES (MILESTONE 4)
+# --------------------------------------------------
+
+import datetime
+import hashlib
+import os
+
+st.session_state.setdefault("update_log", [])
+st.session_state.setdefault("processed_update_hashes", [])
+st.session_state.setdefault("failed_update_hashes", [])
+
+section_header(
+    "🔄",
+    "Add updates",
+    "Add meeting notes or progress updates; the knowledge base updates automatically"
+)
+
+NEW_DOCUMENT_OPTION = "➕ Keep as a separate document"
+
+
+def make_unique_document_name(filename):
+    """Return a filename that does not clash with any stored document."""
+
+    def name_in_use(name):
+        return (
+            name in st.session_state.processed_documents
+            or get_chunk_count(name) > 0
+        )
+
+    if not name_in_use(filename):
+        return filename
+
+    stem, extension = os.path.splitext(filename)
+    number = 2
+
+    while name_in_use(f"{stem} ({number}){extension}"):
+        number += 1
+
+    return f"{stem} ({number}){extension}"
+
+
+def invalidate_document_results(document_name):
+    """Clear analysis results if they belong to this document."""
+
+    if st.session_state.last_selected_document == document_name:
+        st.session_state.scope_results = None
+        st.session_state.risk_results = None
+        st.session_state.blocker_results = None
+        st.session_state.documentation_results = None
+        st.session_state.health_results = None
+
+
+def clear_failed_updates():
+    st.session_state.failed_update_hashes = []
+
+
+if not st.session_state.processed_documents:
+
+    st.info(
+        "Process at least one project document above, "
+        "then add meeting notes or progress updates here."
+    )
+
+else:
+
+    update_target = st.selectbox(
+        "Add updates to",
+        options=[NEW_DOCUMENT_OPTION]
+        + list(st.session_state.processed_documents.keys()),
+        key="incremental_target",
+    )
+
+    st.caption(
+        "Choose an existing document to merge the update into it, "
+        "or keep it as its own document. Files are processed "
+        "automatically as soon as you add them."
+    )
+
+    update_files = st.file_uploader(
+        "Add meeting notes or progress updates",
+        type=["pdf", "docx", "csv", "txt"],
+        accept_multiple_files=True,
+        key="incremental_uploader",
+        label_visibility="collapsed",
+    )
+
+    current_update_hashes = {
+        hashlib.md5(item.getvalue()).hexdigest() + "|" + update_target
+        for item in (update_files or [])
+    }
+
+    # Forget failures for files that were removed from the uploader,
+    # so removing and re-adding a file also retries it.
+    st.session_state.failed_update_hashes = [
+        failed_hash
+        for failed_hash in st.session_state.failed_update_hashes
+        if failed_hash in current_update_hashes
+    ]
+
+    if update_files:
+
+        something_changed = False
+
+        for update_file in update_files:
+
+            file_hash = (
+                hashlib.md5(update_file.getvalue()).hexdigest()
+                + "|"
+                + update_target
+            )
+
+            if (
+                file_hash in st.session_state.processed_update_hashes
+                or file_hash in st.session_state.failed_update_hashes
+            ):
+                continue
+
+            timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+
+            log_entry = {
+                "time": timestamp,
+                "file": update_file.name,
+                "target": update_target,
+                "status": "ok",
+                "message": "",
+            }
+
+            try:
+                with st.spinner(
+                    f"Adding {update_file.name} to the knowledge base..."
+                ):
+
+                    new_text = extract_text(update_file)
+
+                    if not new_text or not str(new_text).strip():
+                        raise ValueError("No readable text found in the file.")
+
+                    merging = update_target != NEW_DOCUMENT_OPTION
+
+                    if merging:
+                        document_name = update_target
+                        update_block = (
+                            f"--- Update added {timestamp} "
+                            f"({update_file.name}) ---\n"
+                            + str(new_text)
+                        )
+                        full_text = (
+                            st.session_state.processed_documents[
+                                document_name
+                            ]
+                            + "\n\n"
+                            + update_block
+                        )
+
+                    else:
+                        document_name = make_unique_document_name(
+                            update_file.name
+                        )
+                        update_block = str(new_text)
+                        full_text = update_block
+
+                    update_chunks = split_text(update_block)
+
+                    if not update_chunks:
+                        raise ValueError("No text chunks could be created.")
+
+                    update_embeddings = generate_embeddings(update_chunks)
+
+                    if merging:
+                        saved_chunks = append_chunks(
+                            update_chunks,
+                            update_embeddings,
+                            document_name,
+                            source=update_file.name
+                        )
+
+                    else:
+                        saved_chunks = store_chunks(
+                            update_chunks,
+                            update_embeddings,
+                            document_name
+                        )
+
+                st.session_state.processed_documents[document_name] = full_text
+
+                if merging:
+                    invalidate_document_results(document_name)
+
+                log_entry["target"] = document_name
+                log_entry["message"] = f"{len(update_chunks)} new chunks indexed"
+
+                if not merging and document_name != update_file.name:
+                    log_entry["message"] += (
+                        f" (name already in use, saved as {document_name})"
+                    )
+
+                # Only a fully successful update is remembered as done.
+                st.session_state.processed_update_hashes.append(file_hash)
+                something_changed = True
+
+            except Exception as error:
+                log_entry["status"] = "failed"
+                log_entry["message"] = str(error)
+
+                # Remember the failure so it is not retried on every
+                # rerun (no rerun loop); the user can retry explicitly.
+                st.session_state.failed_update_hashes.append(file_hash)
+
+            st.session_state.update_log.append(log_entry)
+
+        if something_changed:
+            st.rerun()
+
+    if st.session_state.failed_update_hashes:
+
+        st.button(
+            "Retry failed updates",
+            key="retry_failed_updates",
+            on_click=clear_failed_updates,
+        )
+
+    if st.session_state.update_log:
+
+        recent_updates = [
+            (
+                f"{entry['time']} — {entry['file']} → {entry['target']}: "
+                f"{entry['message']}"
+                if entry["status"] == "ok"
+                else f"⚠️ {entry['time']} — {entry['file']} failed: "
+                f"{entry['message']}"
+            )
+            for entry in reversed(st.session_state.update_log[-5:])
+        ]
+
+        list_card(
+            "Recent updates",
+            recent_updates,
+            "No updates yet.",
+            "actions"
+        )
+
+
+# --------------------------------------------------
 # MODULE 2: SEMANTIC SEARCH
 # --------------------------------------------------
 
 section_header("🔎", "Search project documents", "Ask a question in plain language")
+
+SEARCH_ALL_OPTION = "All documents"
+
+try:
+    searchable_documents = list_document_names()
+except Exception:
+    searchable_documents = []
+
+for stored_name in st.session_state.processed_documents:
+    if stored_name not in searchable_documents:
+        searchable_documents.append(stored_name)
+
+search_scope = st.selectbox(
+    "Search in",
+    options=searchable_documents + [SEARCH_ALL_OPTION],
+    key="search_scope",
+)
 
 question = st.text_input(
     "Ask a question about your project documents",
@@ -764,7 +1172,12 @@ if st.button("Search Documents"):
 
                 results = search_chunks(
                     query_embedding,
-                    n_results=1
+                    n_results=3,
+                    filename=(
+                        None
+                        if search_scope == SEARCH_ALL_OPTION
+                        else search_scope
+                    )
                 )
 
             if not isinstance(results, dict):
@@ -807,6 +1220,13 @@ if st.session_state.search_results:
             source_pill = (
                 f'<span class="pill source">📄 {esc(source)}</span>'
             )
+
+            update_source = metadata_list[index - 1].get("source")
+
+            if update_source:
+                source_pill += (
+                    f'<span class="pill">🔄 update: {esc(update_source)}</span>'
+                )
 
         st.markdown(
             f"""
@@ -1429,3 +1849,259 @@ else:
                 st.error(
                     f"Could not answer the question: {error}"
                 )
+
+    # --------------------------------------------------
+    # MODULE 5: MILESTONE 4 - INSIGHTS & RISK DASHBOARD
+    # --------------------------------------------------
+
+    section_header(
+        "📈",
+        "Insights & Risk Dashboard",
+        "Health score, risks, action items, and scope in one view"
+    )
+
+    def dash_status_color(status_value):
+        return {
+            "Healthy": "#10B981",
+            "Moderate Risk": "#F59E0B",
+            "Critical": "#EF476F",
+        }.get(status_value, "#5B5BF0")
+
+    def dash_clamp(value):
+        try:
+            return max(0.0, min(float(value), 100.0))
+        except (TypeError, ValueError):
+            return 0.0
+
+    def dash_gauge(score_value, status_value):
+        pct = dash_clamp(score_value)
+        color = dash_status_color(status_value)
+        return (
+            '<div class="dash-card gauge-card">'
+            f'<div class="gauge" style="--pct:{pct};--clr:{color}">'
+            '<div class="gauge-inner">'
+            f'<span class="gv">{int(pct)}</span><small>out of 100</small>'
+            '</div></div>'
+            f'<div class="gauge-status" style="color:{color}">{esc(status_value)}</div>'
+            '<div class="gauge-label">Overall project health</div>'
+            '</div>'
+        )
+
+    def dash_bar(label, value):
+        pct = dash_clamp(value)
+        color = (
+            "#10B981" if pct >= 70
+            else "#F59E0B" if pct >= 40
+            else "#EF476F"
+        )
+        return (
+            '<div class="dim"><div class="dim-top">'
+            f'<span>{esc(label)}</span><b>{int(pct)}/100</b></div>'
+            '<div class="dim-track">'
+            f'<div class="dim-fill" style="width:{pct}%;background:{color}"></div>'
+            '</div></div>'
+        )
+
+    if st.button(
+        "Generate Insights Dashboard",
+        key="generate_dashboard",
+        type="primary"
+    ):
+
+        with st.spinner("Building project dashboard..."):
+
+            dashboard_steps = [
+                ("scope_results", extract_scope_and_deliverables, "Scope analysis"),
+                ("risk_results", detect_project_risks, "Risk analysis"),
+                ("blocker_results", identify_blockers_and_actions, "Blocker analysis"),
+                ("health_results", calculate_project_health, "Health calculation"),
+            ]
+
+            for state_key, agent_function, step_name in dashboard_steps:
+
+                try:
+                    st.session_state[state_key] = agent_function(document_text)
+
+                except Exception as error:
+                    st.error(f"{step_name} failed: {error}")
+
+    dash_scope = st.session_state.scope_results
+    dash_risks = st.session_state.risk_results
+    dash_blockers = st.session_state.blocker_results
+    dash_health = st.session_state.health_results
+
+    if all(
+        result is None
+        for result in (dash_scope, dash_risks, dash_blockers, dash_health)
+    ):
+
+        st.info(
+            "Click 'Generate Insights Dashboard' to run all analyses "
+            "and see the project summary."
+        )
+
+    else:
+
+        # ---- Row 1: health gauge + key numbers ----
+
+        dash_left, dash_right = st.columns([1, 2])
+
+        with dash_left:
+
+            if dash_health is not None:
+                st.markdown(
+                    dash_gauge(
+                        dash_health.get("overall_score", 0),
+                        dash_health.get("status", "Unknown"),
+                    ),
+                    unsafe_allow_html=True,
+                )
+            else:
+                st.info("Health score not calculated yet.")
+
+        with dash_right:
+
+            blocker_count = len((dash_blockers or {}).get("blockers", []))
+            decision_count = len((dash_blockers or {}).get("pending_decisions", []))
+            action_count = len((dash_blockers or {}).get("action_items", []))
+            risk_count = len(dash_risks or [])
+
+            k1, k2 = st.columns(2)
+            k1.markdown(stat_tile("Risks found", risk_count), unsafe_allow_html=True)
+            k2.markdown(stat_tile("Blockers", blocker_count), unsafe_allow_html=True)
+
+            st.write("")
+
+            k3, k4 = st.columns(2)
+            k3.markdown(stat_tile("Pending decisions", decision_count), unsafe_allow_html=True)
+            k4.markdown(stat_tile("Action items", action_count), unsafe_allow_html=True)
+
+            if dash_health is not None:
+
+                st.write("")
+
+                st.markdown(
+                    '<div class="dash-card">'
+                    + dash_bar("Scope clarity", dash_health.get("scope_score", 0))
+                    + dash_bar("Timeline", dash_health.get("timeline_score", 0))
+                    + dash_bar("Blockers", dash_health.get("blocker_score", 0))
+                    + '</div>',
+                    unsafe_allow_html=True,
+                )
+
+        # ---- Row 2: risks + action items ----
+
+        risk_col, action_col = st.columns(2)
+
+        with risk_col:
+
+            st.markdown('<div class="dash-title">⚠️ Top risks</div>', unsafe_allow_html=True)
+
+            if dash_risks:
+
+                for risk in dash_risks[:6]:
+
+                    evidence_text = str(risk.get("evidence", "N/A"))
+
+                    if len(evidence_text) > 160:
+                        evidence_text = evidence_text[:160] + "…"
+
+                    risk_pills = "".join(
+                        f'<span class="pill">{esc(k)}</span>'
+                        for k in risk.get("matched_keywords", [])
+                    )
+
+                    st.markdown(
+                        '<div class="risk-row">'
+                        f'<div class="risk-title">{esc(risk.get("risk_type", "Unknown"))}</div>'
+                        f'<div class="risk-ev">{esc(evidence_text)}</div>'
+                        f'{risk_pills}</div>',
+                        unsafe_allow_html=True,
+                    )
+
+                if len(dash_risks) > 6:
+                    st.caption(
+                        f"Showing 6 of {len(dash_risks)} risks. "
+                        "See the Risk Detection tab for all."
+                    )
+
+            elif dash_risks is None:
+                st.info("Risks not analyzed yet.")
+
+            else:
+                st.info("No risks matched the current keyword rules.")
+
+        with action_col:
+
+            st.markdown('<div class="dash-title">✅ Action items &amp; blockers</div>', unsafe_allow_html=True)
+
+            if dash_blockers is not None:
+
+                list_card(
+                    "Action items",
+                    dash_blockers.get("action_items", [])[:5],
+                    "No action items detected.",
+                    "actions"
+                )
+
+                list_card(
+                    "Blockers",
+                    dash_blockers.get("blockers", [])[:5],
+                    "No blockers detected.",
+                    "blockers"
+                )
+
+                list_card(
+                    "Pending decisions",
+                    dash_blockers.get("pending_decisions", [])[:5],
+                    "No pending decisions detected.",
+                    "decisions"
+                )
+
+            else:
+                st.info("Blockers and action items not analyzed yet.")
+
+        # ---- Row 3: scope summary ----
+
+        st.markdown('<div class="dash-title">🎯 Scope summary</div>', unsafe_allow_html=True)
+
+        if dash_scope is not None:
+
+            scope_labels = [
+                ("goals", "Goals"),
+                ("deliverables", "Deliverables"),
+                ("milestones", "Milestones"),
+                ("timelines", "Timelines"),
+                ("responsibilities", "Responsibilities"),
+            ]
+
+            scope_columns = st.columns(len(scope_labels))
+
+            for column, (scope_key, scope_label) in zip(scope_columns, scope_labels):
+                column.markdown(
+                    stat_tile(scope_label, len(dash_scope.get(scope_key, []))),
+                    unsafe_allow_html=True
+                )
+
+            st.write("")
+
+            goal_col, deliverable_col = st.columns(2)
+
+            with goal_col:
+                list_card(
+                    "🎯 Key goals",
+                    dash_scope.get("goals", [])[:3],
+                    "No goals found.",
+                    "result"
+                )
+
+            with deliverable_col:
+                list_card(
+                    "📦 Key deliverables",
+                    dash_scope.get("deliverables", [])[:3],
+                    "No deliverables found.",
+                    "result"
+                )
+
+        else:
+            st.info("Scope not analyzed yet.")
