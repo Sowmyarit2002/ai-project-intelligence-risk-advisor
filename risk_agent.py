@@ -1,5 +1,3 @@
-
-
 import re
 
 
@@ -66,6 +64,14 @@ HEADING_PATTERN = re.compile(
     r"^[A-Z][A-Z\s&/:-]{3,}$"
 )
 
+# Lines such as "--- Update added 2026-11-24 10:15 (notes.txt) ---" are
+# added by the incremental-upload feature. They end the previous record so
+# the update text is not glued onto the last record of the original file.
+UPDATE_MARKER_PATTERN = re.compile(
+    r"^-{3,}\s*update added",
+    re.IGNORECASE
+)
+
 
 # --------------------------------------------------
 # COMPILE PATTERNS
@@ -88,17 +94,42 @@ COMPILED_PATTERNS = {
 }
 
 
-def extract_risk_records(text):
-    """Extract explicitly numbered project records."""
+# --------------------------------------------------
+# HELPERS
+# --------------------------------------------------
+
+def _normalize(text):
+    return re.sub(r"\s+", " ", str(text)).strip().casefold()
+
+
+def _scan_records(text):
+    """
+    Extract explicitly numbered project records.
+
+    Returns (records, consumed) where consumed is the set of line
+    numbers that belong to a numbered record (its first line and any
+    continuation lines), so they are not analysed a second time as
+    free text.
+    """
 
     records = []
+    consumed = set()
     current = None
 
-    for raw_line in text.splitlines():
+    for line_number, raw_line in enumerate(text.splitlines()):
 
         line = raw_line.strip()
 
         if not line:
+            continue
+
+        if UPDATE_MARKER_PATTERN.match(line):
+
+            if current:
+                records.append(current)
+                current = None
+
+            consumed.add(line_number)
             continue
 
         match = RECORD_PATTERN.match(line)
@@ -113,6 +144,7 @@ def extract_risk_records(text):
                 "description": match.group("description").strip()
             }
 
+            consumed.add(line_number)
             continue
 
         if HEADING_PATTERN.match(line):
@@ -125,11 +157,18 @@ def extract_risk_records(text):
 
         if current:
             current["description"] += " " + line
+            consumed.add(line_number)
 
     if current:
         records.append(current)
 
-    return records
+    return records, consumed
+
+
+def extract_risk_records(text):
+    """Extract explicitly numbered project records."""
+
+    return _scan_records(text)[0]
 
 
 def classify_risk(description):
@@ -157,127 +196,146 @@ def classify_risk(description):
     return matches
 
 
+def _primary_risk_type(matches):
+    """Category with the most matched keywords (ties: pattern order)."""
+
+    order = list(RISK_PATTERNS)
+
+    return max(
+        matches,
+        key=lambda risk_type: (len(matches[risk_type]), -order.index(risk_type))
+    )
+
+
+def _build_record(risk_id, evidence, matches, source):
+    """One structured record for one distinct risk."""
+
+    keywords = []
+
+    for risk_type in RISK_PATTERNS:
+        for keyword in matches.get(risk_type, []):
+            if keyword not in keywords:
+                keywords.append(keyword)
+
+    return {
+        "risk_id": risk_id,
+        "risk_type": _primary_risk_type(matches),
+        "risk_types": [t for t in RISK_PATTERNS if t in matches],
+        "evidence": evidence,
+        "matched_keywords": keywords,
+        "source": source,
+    }
+
+
+# --------------------------------------------------
+# RISK DETECTION
+# --------------------------------------------------
+
 def detect_project_risks(text):
     """
-    Detect project risks using explicit R-series records
-    and keyword-based evidence.
+    Detect project risks and return ONE record per distinct risk.
 
-    Ignores B-series, A-series, T-series and D-series records.
+    Each record has:
+        risk_id           unique ID (R1, R2... for numbered risk records,
+                          U1, U2... for risks found in free text)
+        risk_type         main category
+        risk_types        every category the risk matched
+        evidence          the single statement the risk comes from
+        matched_keywords  keywords found in that statement
+        source            "numbered record" or "free text"
+
+    A risk that matches several categories is still ONE record, so it
+    is never counted twice. Only R-series records are accepted as
+    explicit risks; A, B, T and D records are ignored.
     """
 
     if not isinstance(text, str) or not text.strip():
         return []
 
-    grouped_risks = {
-        risk_type: {
-            "evidence": [],
-            "matched_keywords": []
-        }
-        for risk_type in RISK_PATTERNS
-    }
-
+    risks = []
     seen_evidence = set()
+    used_ids = {}
 
-    def add_risk(risk_type, evidence, keywords):
-
-        normalized = re.sub(
-            r"\s+",
-            " ",
-            evidence
-        ).strip().casefold()
-
-        if not normalized or normalized in seen_evidence:
-            return
-
-        seen_evidence.add(normalized)
-
-        details = grouped_risks[risk_type]
-
-        details["evidence"].append(evidence)
-
-        for keyword in keywords:
-            if keyword not in details["matched_keywords"]:
-                details["matched_keywords"].append(keyword)
+    def unique_id(base_id):
+        used_ids[base_id] = used_ids.get(base_id, 0) + 1
+        count = used_ids[base_id]
+        return base_id if count == 1 else f"{base_id}.{count}"
 
     # --------------------------------------------------
-    # 1. PROCESS EXPLICITLY NUMBERED RECORDS
+    # 1. EXPLICITLY NUMBERED R-SERIES RECORDS
     # --------------------------------------------------
 
-    records = extract_risk_records(text)
+    records, consumed = _scan_records(text)
 
     for record in records:
 
         record_id = record["id"]
         description = record["description"]
 
-        # Only R-series records are accepted as explicit risks.
-        if not record_id.startswith("R"):
+        if not record_id.startswith("R") or not description:
             continue
 
-        if not description:
+        evidence = f"{record_id} — {description}"
+        normalized = _normalize(evidence)
+
+        if normalized in seen_evidence:
             continue
+
+        seen_evidence.add(normalized)
 
         matches = classify_risk(description)
 
-        if matches:
+        if not matches:
+            # An explicitly documented R-series item is still a risk
+            # even if no known keyword matches.
+            matches = {"Delivery Challenge": ["explicit risk record"]}
 
-            for risk_type, keywords in matches.items():
-
-                add_risk(
-                    risk_type,
-                    f"{record_id} — {description}",
-                    keywords
-                )
-
-        else:
-
-            # An explicitly documented R-series item is still
-            # a risk even if no known keyword matches.
-            add_risk(
-                "Delivery Challenge",
-                f"{record_id} — {description}",
-                ["explicit risk record"]
+        risks.append(
+            _build_record(
+                unique_id(record_id),
+                evidence,
+                matches,
+                "numbered record"
             )
+        )
 
     # --------------------------------------------------
-    # 2. PROCESS UNNUMBERED RISK EVIDENCE
+    # 2. UNNUMBERED RISK EVIDENCE (FREE TEXT)
     # --------------------------------------------------
 
-    for raw_line in text.splitlines():
+    free_text_count = 0
 
-        clean = re.sub(
-            r"\s+",
-            " ",
-            raw_line
-        ).strip()
+    for line_number, raw_line in enumerate(text.splitlines()):
 
-        if not clean:
+        # Lines that belong to a numbered record were handled above.
+        if line_number in consumed:
             continue
 
-        # Ignore all numbered records here.
-        if RECORD_PATTERN.match(clean):
+        clean = re.sub(r"\s+", " ", raw_line).strip()
+
+        if not clean or RECORD_PATTERN.match(clean):
             continue
 
         matches = classify_risk(clean)
 
-        for risk_type, keywords in matches.items():
+        if not matches:
+            continue
 
-            add_risk(
-                risk_type,
+        normalized = _normalize(clean)
+
+        if normalized in seen_evidence:
+            continue
+
+        seen_evidence.add(normalized)
+        free_text_count += 1
+
+        risks.append(
+            _build_record(
+                f"U{free_text_count}",
                 clean,
-                keywords
+                matches,
+                "free text"
             )
+        )
 
-    # --------------------------------------------------
-    # 3. RETURN RESULTS IN THE EXISTING FORMAT
-    # --------------------------------------------------
-
-    return [
-        {
-            "risk_type": risk_type,
-            "evidence": "\n".join(details["evidence"]),
-            "matched_keywords": details["matched_keywords"],
-        }
-        for risk_type, details in grouped_risks.items()
-        if details["evidence"]
-    ]
+    return risks
