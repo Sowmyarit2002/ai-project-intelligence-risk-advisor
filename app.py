@@ -41,42 +41,45 @@ st.set_page_config(
 
 CUSTOM_CSS = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
 
 :root {
-    color-scheme: light;
+    color-scheme: dark;
 
-    --bg: #F6F4FB;
-    --panel: rgba(255, 255, 255, 0.82);
-    --panel-solid: #FFFFFF;
-    --panel-2: #F3F1FA;
-    --line: rgba(76, 62, 140, 0.10);
-    --line-strong: rgba(76, 62, 140, 0.20);
+    --bg: #0B1220;
+    --bg-soft: #0F1729;
+    --panel: #121B2E;
+    --panel-2: #172238;
+    --panel-3: #1C2A44;
+    --line: #202D45;
+    --line-strong: #2F4062;
 
-    --text: #292745;
-    --muted: #6D6B88;
-    --ink: #1F1D3D;
+    --text: #D5DDEC;
+    --muted: #8793AE;
+    --ink: #F4F6FB;
 
-    --violet: #6C63D9;
-    --violet-dark: #4F46B8;
-    --lilac: #EDE9FF;
-    --mint: #3DB8A4;
-    --mint-dark: #2A8F7F;
-    --mint-soft: #DFF5F0;
-    --peach: #FFE9DA;
-    --amber: #DFA03F;
-    --rose: #D6586E;
-    --track: #E8E4F5;
+    --gold: #E6B96A;
+    --gold-deep: #C99A47;
+    --gold-soft: rgba(230, 185, 106, 0.12);
+    --gold-line: rgba(230, 185, 106, 0.35);
+    --teal: #3FD0AE;
+    --teal-soft: rgba(63, 208, 174, 0.12);
+    --indigo: #93A2FF;
+    --indigo-soft: rgba(147, 162, 255, 0.13);
+    --rose: #F0626F;
+    --rose-soft: rgba(240, 98, 111, 0.12);
+    --amber: #F2B24C;
+    --amber-soft: rgba(242, 178, 76, 0.12);
+    --track: #22314D;
 
-    --radius: 18px;
-    --radius-sm: 12px;
-    --shadow-sm: 0 1px 2px rgba(60, 48, 120, 0.05), 0 2px 8px -4px rgba(60, 48, 120, 0.08);
-    --shadow: 0 1px 2px rgba(60, 48, 120, 0.04), 0 14px 32px -18px rgba(60, 48, 120, 0.22);
-    --shadow-lg: 0 24px 48px -24px rgba(79, 70, 184, 0.35);
+    --radius: 16px;
+    --radius-sm: 11px;
+    --shadow-sm: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 1px 2px rgba(0, 0, 0, 0.35);
+    --shadow: 0 1px 0 rgba(255, 255, 255, 0.035) inset, 0 10px 28px -16px rgba(0, 0, 0, 0.65);
     --ease: cubic-bezier(.22, .8, .3, 1);
 
-    --font-body: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
-    --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+    --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-display: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
 }
 
 /* ---------- Base ---------- */
@@ -88,14 +91,13 @@ html, body, [class*="css"], .stApp {
 
 html { scroll-behavior: smooth; }
 
-::selection { background: rgba(108, 99, 217, 0.22); }
+::selection { background: rgba(230, 185, 106, 0.28); color: #fff; }
 
 .stApp {
     background:
-        radial-gradient(900px 520px at 8% -8%, rgba(188, 174, 255, 0.38), transparent 62%),
-        radial-gradient(800px 480px at 98% 4%, rgba(160, 228, 214, 0.34), transparent 60%),
-        radial-gradient(700px 520px at 60% 108%, rgba(255, 214, 190, 0.30), transparent 60%),
-        linear-gradient(180deg, #FBFAFE 0%, var(--bg) 100%);
+        radial-gradient(900px 420px at 4% -10%, rgba(230, 185, 106, 0.07), transparent 65%),
+        radial-gradient(800px 420px at 100% 0%, rgba(147, 162, 255, 0.06), transparent 60%),
+        var(--bg);
     background-attachment: fixed;
 }
 
@@ -117,247 +119,191 @@ html { scroll-behavior: smooth; }
 header[data-testid="stHeader"] { background: transparent; }
 
 .block-container {
-    padding-top: 1.2rem;
+    padding-top: 1rem;
     padding-bottom: 5rem;
-    max-width: 1180px;
+    max-width: 1200px;
 }
 
 h1, h2, h3, h4, h5 {
-    font-family: var(--font-body);
+    font-family: var(--font-display);
     letter-spacing: -0.012em;
     color: var(--ink);
 }
 
-h3 { font-weight: 700; font-size: 1.3rem; }
-h4 { font-weight: 700; font-size: 1.05rem; }
+h3 { font-weight: 700; font-size: 1.2rem; }
+h4 { font-weight: 700; font-size: 1.02rem; }
 
 [data-testid="stMain"] h2 a, [data-testid="stMain"] h3 a, [data-testid="stMain"] h4 a { display: none; }
 
 hr {
     border: none !important;
     height: 1px !important;
-    background: linear-gradient(90deg, transparent, var(--line-strong), transparent) !important;
-    margin: 1.4rem 0 !important;
+    background: var(--line) !important;
+    margin: 1.2rem 0 !important;
 }
 
-/* ---------- Entrance animation ---------- */
+.ic { flex: none; display: block; }
+
+/* ---------- Motion ---------- */
 @keyframes riseIn {
-    from { opacity: 0; transform: translateY(14px); }
+    from { opacity: 0; transform: translateY(8px); }
     to   { opacity: 1; transform: translateY(0); }
 }
-@keyframes drift {
-    0%, 100% { transform: translate3d(0, 0, 0); }
-    50%      { transform: translate3d(14px, -10px, 0); }
-}
 @keyframes pulseDot {
-    0%   { box-shadow: 0 0 0 0 rgba(61, 184, 164, .55); }
-    70%  { box-shadow: 0 0 0 8px rgba(61, 184, 164, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(61, 184, 164, 0); }
+    0%   { box-shadow: 0 0 0 0 rgba(63, 208, 174, .5); }
+    70%  { box-shadow: 0 0 0 6px rgba(63, 208, 174, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(63, 208, 174, 0); }
 }
 @keyframes growX {
     from { transform: scaleX(0); }
     to   { transform: scaleX(1); }
 }
 
-.hero, .section-head, .card, .dash-card, .kpi-card, .risk-row, .stat,
+.page-head, .section-head, .card, .dash-card, .kpi-card, .risk-row, .stat, .ov-card,
 [data-testid="stExpander"], [data-testid="stMetric"], [data-testid="stAlert"] {
-    animation: riseIn .55s var(--ease) both;
+    animation: riseIn .4s var(--ease) both;
 }
 
-/* ---------- Top navigation ---------- */
-[data-testid="stElementContainer"]:has(.topnav) {
+/* ---------- Top bar ---------- */
+[data-testid="stElementContainer"]:has(.topbar) {
     position: sticky;
-    top: .6rem;
+    top: .5rem;
     z-index: 60;
 }
 
-.topnav {
+.topbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    padding: .5rem .55rem .5rem 1rem;
-    margin-bottom: 1.2rem;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.72);
-    backdrop-filter: blur(18px) saturate(1.4);
-    -webkit-backdrop-filter: blur(18px) saturate(1.4);
-    border: 1px solid rgba(255, 255, 255, 0.9);
-    box-shadow: 0 10px 30px -16px rgba(60, 48, 120, 0.35), inset 0 0 0 1px var(--line);
+    padding: .65rem 1.1rem;
+    margin-bottom: 1.6rem;
+    border-radius: 14px;
+    background: rgba(15, 23, 41, 0.82);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--line);
+    box-shadow: 0 12px 30px -20px rgba(0, 0, 0, 0.8);
 }
 
-.topnav .brand {
+.topbar .crumbs {
     display: flex;
     align-items: center;
-    gap: .6rem;
-    font-weight: 700;
-    font-size: .95rem;
-    color: var(--ink);
-    white-space: nowrap;
-}
-
-.topnav .mark, .side-brand .mark {
-    width: 30px;
-    height: 30px;
-    border-radius: 10px;
-    display: grid;
-    place-items: center;
-    color: #fff;
-    font-size: .85rem;
-    background: linear-gradient(135deg, #8B7CF6, #5B8DEF 60%, #3DB8A4);
-    box-shadow: 0 6px 14px -6px rgba(91, 100, 220, 0.7);
-}
-
-.topnav nav {
-    display: flex;
-    align-items: center;
-    gap: .15rem;
-    overflow-x: auto;
-    scrollbar-width: none;
-}
-.topnav nav::-webkit-scrollbar { display: none; }
-
-.stApp .topnav nav a {
-    padding: .42rem .85rem;
-    border-radius: 999px;
+    gap: .55rem;
     font-size: .86rem;
-    font-weight: 500;
     color: var(--muted);
-    text-decoration: none;
-    white-space: nowrap;
-    transition: background .2s var(--ease), color .2s var(--ease);
 }
+.stApp .topbar .crumbs span { color: var(--muted); }
+.stApp .topbar .crumbs b { color: var(--line-strong); font-weight: 500; }
+.stApp .topbar .crumbs strong { color: var(--ink); font-weight: 600; }
+.topbar .crumbs .ic { color: var(--muted); }
 
-.stApp .topnav nav a:hover {
-    background: var(--lilac);
-    color: var(--violet-dark);
-}
+.topbar .status-row { display: flex; align-items: center; gap: 1.1rem; }
 
-.topnav .live {
+.stApp .status-pill {
     display: inline-flex;
     align-items: center;
     gap: .45rem;
-    padding: .42rem .9rem;
-    border-radius: 999px;
-    font-size: .8rem;
+    font-size: .68rem;
     font-weight: 600;
-    color: var(--mint-dark);
-    background: var(--mint-soft);
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--muted);
     white-space: nowrap;
 }
-
-.topnav .live i {
+.status-pill i {
     width: 7px; height: 7px; border-radius: 50%;
-    background: var(--mint);
-    animation: pulseDot 2.2s infinite;
+    background: var(--teal);
+    animation: pulseDot 2.4s infinite;
+}
+.status-pill.idle i { background: var(--amber); animation: none; }
+
+/* ---------- Page header ---------- */
+.page-head { margin: .2rem 0 1.8rem; scroll-margin-top: 90px; }
+
+.stApp .page-head .eyebrow {
+    display: block;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: .5rem;
 }
 
-/* ---------- Hero ---------- */
-.hero {
-    position: relative;
-    padding: 2.8rem 2.8rem 2.5rem;
-    border-radius: 28px;
-    border: 1px solid rgba(255, 255, 255, 0.85);
-    background:
-        linear-gradient(135deg, rgba(255,255,255,.85) 0%, rgba(244,240,255,.75) 50%, rgba(231,248,244,.8) 100%);
-    box-shadow: var(--shadow), inset 0 0 0 1px var(--line);
-    overflow: hidden;
-    margin-bottom: 1.8rem;
-}
-
-.hero::before, .hero::after {
-    content: "";
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(40px);
-    pointer-events: none;
-    animation: drift 14s ease-in-out infinite;
-}
-.hero::before {
-    width: 320px; height: 320px; right: -60px; top: -90px;
-    background: radial-gradient(circle, rgba(167, 150, 255, .55), transparent 70%);
-}
-.hero::after {
-    width: 260px; height: 260px; right: 160px; bottom: -120px;
-    background: radial-gradient(circle, rgba(255, 196, 160, .55), transparent 70%);
-    animation-delay: -6s;
-}
-
-.hero > * { position: relative; z-index: 1; }
-
-.hero .status {
-    display: inline-flex;
-    align-items: center;
-    gap: .55rem;
-    font-size: .8rem;
-    font-weight: 600;
-    color: var(--violet-dark);
-    background: rgba(255, 255, 255, .75);
-    border: 1px solid var(--line);
-    padding: .32rem .85rem;
-    border-radius: 999px;
-    margin-bottom: 1.1rem;
-}
-
-.hero .dot {
-    width: 7px; height: 7px; border-radius: 50%;
-    background: var(--mint);
-    animation: pulseDot 2.2s infinite;
-}
-
-.stApp .hero h1 {
-    margin: 0 0 .8rem;
+.stApp .page-head h1 {
+    margin: 0 0 .55rem;
     padding: 0;
-    max-width: 700px;
     font-family: var(--font-display);
-    font-size: 2.9rem;
-    line-height: 1.1;
-    font-weight: 600;
-    letter-spacing: -0.025em;
+    font-size: 2.35rem;
+    line-height: 1.12;
+    font-weight: 800;
+    letter-spacing: -0.03em;
     color: var(--ink) !important;
 }
 
-.stApp .hero h1 em {
-    font-style: italic;
-    background: linear-gradient(100deg, #6C63D9, #3DB8A4);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+.stApp .page-head h1 em {
+    font-style: normal;
+    color: var(--gold);
 }
 
-.stApp .hero p {
+.stApp .page-head p {
     margin: 0;
+    max-width: 640px;
     color: var(--muted) !important;
-    max-width: 580px;
-    font-size: 1.05rem;
+    font-size: 1rem;
     line-height: 1.65;
 }
 
-.hero-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: .5rem;
-    margin-top: 1.5rem;
+/* ---------- Overview tiles ---------- */
+.ov-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .9rem;
+    margin-bottom: .6rem;
 }
 
-.stApp .hero-chips span {
-    font-size: .82rem;
-    font-weight: 600;
-    color: var(--text);
-    padding: .4rem .9rem;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, .8);
+.ov-card {
+    padding: 1.15rem 1.2rem 1.05rem;
+    border-radius: var(--radius);
+    background: var(--panel);
     border: 1px solid var(--line);
     box-shadow: var(--shadow-sm);
-    transition: transform .25s var(--ease), box-shadow .25s var(--ease);
+    transition: border-color .25s var(--ease), transform .25s var(--ease);
 }
-.hero-chips span:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.ov-card:hover { border-color: var(--line-strong); transform: translateY(-1px); }
+
+.ov-ico {
+    width: 34px; height: 34px;
+    border-radius: 10px;
+    display: grid; place-items: center;
+    margin-bottom: 1.05rem;
+    color: var(--indigo);
+    background: var(--indigo-soft);
+    border: 1px solid rgba(147, 162, 255, 0.18);
+}
+.ov-card.gold  .ov-ico { color: var(--gold);  background: var(--gold-soft);  border-color: var(--gold-line); }
+.ov-card.teal  .ov-ico { color: var(--teal);  background: var(--teal-soft);  border-color: rgba(63, 208, 174, 0.25); }
+.ov-card.rose  .ov-ico { color: var(--rose);  background: var(--rose-soft);  border-color: rgba(240, 98, 111, 0.28); }
+.ov-card.amber .ov-ico { color: var(--amber); background: var(--amber-soft); border-color: rgba(242, 178, 76, 0.28); }
+
+.stApp .ov-label { display: block; font-size: .8rem; color: var(--muted); font-weight: 500; }
+.stApp .ov-value {
+    display: block;
+    margin: .2rem 0 .25rem;
+    font-family: var(--font-display);
+    font-size: 1.95rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--ink);
+}
+.stApp .ov-sub { display: block; font-size: .74rem; color: var(--muted); opacity: .85; }
 
 /* ---------- Section headings ---------- */
 .section-head {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: .95rem;
     margin: 3rem 0 1.2rem;
     padding-bottom: 1rem;
     border-bottom: 1px solid var(--line);
@@ -365,24 +311,24 @@ hr {
 }
 
 .section-head .icon {
-    width: 46px;
-    height: 46px;
+    width: 44px;
+    height: 44px;
     flex: none;
-    border-radius: 15px;
+    border-radius: 12px;
     display: grid;
     place-items: center;
-    font-size: 1.25rem;
-    background: linear-gradient(145deg, #F1EDFF, #E1F6F1);
-    border: 1px solid rgba(255,255,255,.9);
-    box-shadow: 0 8px 18px -10px rgba(79, 70, 184, 0.5);
+    font-size: 1.15rem;
+    color: var(--gold);
+    background: var(--gold-soft);
+    border: 1px solid var(--gold-line);
 }
 
 .stApp .section-head h2 {
     margin: 0;
     padding: 0;
     font-family: var(--font-display);
-    font-size: 1.6rem;
-    font-weight: 600;
+    font-size: 1.4rem;
+    font-weight: 700;
     letter-spacing: -0.02em;
     color: var(--ink);
 }
@@ -390,79 +336,75 @@ hr {
 .stApp .section-head span.sub {
     display: block;
     color: var(--muted);
-    font-size: .92rem;
-    margin-top: .2rem;
+    font-size: .88rem;
+    margin-top: .18rem;
 }
 
 /* ---------- Cards ---------- */
 .card {
     background: var(--panel);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,.9);
+    border: 1px solid var(--line);
     border-radius: var(--radius);
-    padding: 1.2rem 1.4rem;
+    padding: 1.15rem 1.35rem;
     margin-bottom: 1rem;
-    box-shadow: var(--shadow), inset 0 0 0 1px var(--line);
-    transition: transform .3s var(--ease), box-shadow .3s var(--ease);
+    box-shadow: var(--shadow-sm);
+    transition: border-color .25s var(--ease);
 }
-
-.card:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-lg), inset 0 0 0 1px var(--line-strong);
-}
+.card:hover { border-color: var(--line-strong); }
 
 .stApp .card h4 {
     margin: 0 0 .65rem;
     padding: 0;
-    font-size: .98rem;
+    font-size: .95rem;
     font-weight: 700;
     color: var(--ink);
 }
 
-.card ul { margin: 0; padding-left: 1.15rem; color: var(--text); }
-.card li { margin-bottom: .4rem; line-height: 1.6; color: var(--text); }
-.card li::marker { color: var(--violet); }
-.card .empty { color: var(--muted); font-style: italic; margin: 0; }
+.card ul { margin: 0; padding-left: 1.1rem; color: var(--text); }
+.card li { margin-bottom: .42rem; line-height: 1.6; color: var(--text); }
+.card li::marker { color: var(--gold); }
+.card .empty {
+    color: var(--muted);
+    font-style: normal;
+    margin: 0;
+    padding: 1rem;
+    text-align: center;
+    border: 1px dashed var(--line-strong);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.015);
+    font-size: .9rem;
+}
 .card p { margin: 0; line-height: 1.65; color: var(--text); }
 
-.card.result {
-    border-left: 4px solid var(--violet);
-    background: linear-gradient(90deg, rgba(108,99,217,0.07), var(--panel) 40%);
-}
+.card.result { border-left: 3px solid var(--gold); }
 
-.card.risk {
-    border-left: 4px solid var(--rose);
-    background: linear-gradient(90deg, rgba(214,88,110,0.07), var(--panel) 40%);
-}
+.card.risk { border-left: 3px solid var(--rose); }
+.card.risk .rtype { font-weight: 700; color: #FF8A95; margin-bottom: .45rem; }
 
-.card.risk .rtype {
-    font-weight: 700;
-    color: #B63F57;
-    margin-bottom: .45rem;
-}
-
-.card.blockers  { border-top: 4px solid var(--rose); }
-.card.decisions { border-top: 4px solid var(--amber); }
-.card.actions   { border-top: 4px solid var(--mint); }
+.card.blockers  { border-top: 3px solid var(--rose); }
+.card.decisions { border-top: 3px solid var(--amber); }
+.card.actions   { border-top: 3px solid var(--teal); }
+.card.blockers li::marker  { color: var(--rose); }
+.card.decisions li::marker { color: var(--amber); }
+.card.actions li::marker   { color: var(--teal); }
 
 /* ---------- Pills ---------- */
 .stApp .pill {
     display: inline-block;
-    font-size: .76rem;
+    font-size: .72rem;
     font-weight: 600;
-    padding: .2rem .7rem;
+    padding: .2rem .65rem;
     margin: .5rem .35rem 0 0;
     border-radius: 999px;
-    color: var(--violet-dark);
-    background: var(--lilac);
-    border: 1px solid rgba(108, 99, 217, 0.18);
+    color: var(--gold);
+    background: var(--gold-soft);
+    border: 1px solid var(--gold-line);
 }
 
 .stApp .pill.source {
-    color: var(--mint-dark);
-    background: var(--mint-soft);
-    border-color: rgba(61, 184, 164, 0.25);
+    color: var(--teal);
+    background: var(--teal-soft);
+    border-color: rgba(63, 208, 174, 0.3);
 }
 
 /* ---------- Stat tiles ---------- */
@@ -470,49 +412,44 @@ hr {
     position: relative;
     display: flex;
     flex-direction: column;
-    padding: 1rem 1.1rem;
-    border-radius: 16px;
-    background: rgba(255, 255, 255, .85);
-    border: 1px solid rgba(255,255,255,.9);
-    box-shadow: var(--shadow-sm), inset 0 0 0 1px var(--line);
+    padding: .95rem 1.1rem;
+    border-radius: 14px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-sm);
     overflow: hidden;
-    transition: transform .25s var(--ease);
 }
-.stat:hover { transform: translateY(-2px); }
 
 .stat::before {
     content: "";
     position: absolute;
     left: 0; top: 0; bottom: 0;
-    width: 4px;
-    background: linear-gradient(180deg, var(--violet), var(--mint));
+    width: 3px;
+    background: var(--gold);
 }
 
 .stat .value {
     font-family: var(--font-display);
-    font-size: 2rem;
-    font-weight: 600;
+    font-size: 1.8rem;
+    font-weight: 700;
     line-height: 1.1;
     color: var(--ink);
 }
 
 .stat .label {
     margin-top: .25rem;
-    font-size: .8rem;
+    font-size: .78rem;
     font-weight: 500;
     color: var(--muted);
 }
 
 /* ---------- Sidebar ---------- */
 section[data-testid="stSidebar"] {
-    background:
-        radial-gradient(360px 260px at 0% 0%, rgba(188,174,255,.35), transparent 70%),
-        radial-gradient(320px 260px at 100% 100%, rgba(160,228,214,.30), transparent 70%),
-        rgba(252, 251, 255, 0.92);
+    background: #0A101D;
     border-right: 1px solid var(--line);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
 }
+
+section[data-testid="stSidebar"] > div { padding-top: .6rem; }
 
 section[data-testid="stSidebar"] :is(p, span, label, li, h1, h2, h3, h4, h5) {
     color: var(--text);
@@ -523,67 +460,125 @@ section[data-testid="stSidebar"] small {
     color: var(--muted) !important;
 }
 
+section[data-testid="stSidebar"] hr { margin: 1rem 0 !important; }
+
 .side-brand {
     display: flex;
     align-items: center;
     gap: .75rem;
-    margin-bottom: .3rem;
+    padding: .2rem .2rem .3rem;
 }
-.side-brand .mark { width: 38px; height: 38px; border-radius: 12px; font-size: 1rem; }
-.side-brand .name { font-weight: 700; font-size: 1.02rem; color: var(--ink); line-height: 1.2; }
-.side-brand .tag { font-size: .8rem; color: var(--muted); line-height: 1.35; margin-top: .1rem; }
+.side-brand .mark {
+    width: 40px; height: 40px;
+    flex: none;
+    border-radius: 11px;
+    display: grid; place-items: center;
+    color: var(--gold);
+    background: var(--panel-2);
+    border: 1px solid var(--line-strong);
+}
+.stApp .side-brand .name { font-family: var(--font-display); font-weight: 700; font-size: 1rem; color: var(--ink); line-height: 1.2; display: block; }
+.stApp .side-brand .tag { font-size: .6rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-top: .2rem; display: block; }
 
 .side-label {
-    font-size: .72rem;
+    font-size: .66rem;
     font-weight: 700;
-    letter-spacing: .09em;
+    letter-spacing: .14em;
     text-transform: uppercase;
     color: var(--muted);
-    margin: .2rem 0 .7rem;
+    margin: .3rem 0 .55rem .3rem;
 }
 
-.steps { display: flex; flex-direction: column; gap: .5rem; }
+.nav { display: flex; flex-direction: column; gap: .15rem; margin-bottom: 1.2rem; }
+
+.stApp .nav a {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: .55rem .7rem;
+    border-radius: 10px;
+    font-size: .88rem;
+    font-weight: 500;
+    color: var(--muted);
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: background .2s var(--ease), color .2s var(--ease), border-color .2s var(--ease);
+}
+.stApp .nav a .ic { color: var(--muted); transition: color .2s var(--ease); }
+.stApp .nav a:hover {
+    background: var(--panel-2);
+    color: var(--ink);
+    border-color: var(--line);
+}
+.stApp .nav a:hover .ic { color: var(--gold); }
+
+.steps { display: flex; flex-direction: column; gap: .4rem; }
 
 .step {
     display: flex;
     align-items: center;
     gap: .7rem;
-    padding: .6rem .8rem;
-    border-radius: 12px;
-    font-size: .9rem;
+    padding: .5rem .7rem;
+    border-radius: 10px;
+    font-size: .84rem;
     font-weight: 500;
     color: var(--muted);
-    background: rgba(255,255,255,.55);
+    background: transparent;
     border: 1px solid var(--line);
-    transition: transform .25s var(--ease), background .25s var(--ease);
 }
-.step:hover { transform: translateX(3px); background: rgba(255,255,255,.95); }
 
 .step .tick {
-    width: 22px; height: 22px; flex: none;
+    width: 20px; height: 20px; flex: none;
     border-radius: 50%;
     display: grid; place-items: center;
-    font-size: .7rem; font-weight: 700;
+    font-size: .65rem; font-weight: 700;
     color: var(--muted);
     background: var(--track);
 }
 
-.step.done { color: var(--ink); background: rgba(255,255,255,.95); }
-.step.done .tick { color: #fff; background: linear-gradient(135deg, #3DB8A4, #2A8F7F); }
+.step.done { color: var(--ink); background: var(--panel-2); }
+.step.done .tick { color: #0B1220; background: var(--teal); }
+
+.side-status {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    margin-top: 1.1rem;
+    padding: .7rem .9rem;
+    border-radius: 12px;
+    background: var(--panel);
+    border: 1px solid var(--line-strong);
+    font-size: .85rem;
+    color: var(--text);
+}
+.side-status .ic { color: var(--muted); }
+.side-status .grow { flex: 1; }
+.side-status i {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--teal);
+    animation: pulseDot 2.4s infinite;
+}
+
+.stApp .side-foot {
+    margin-top: .9rem;
+    padding-left: .3rem;
+    font-size: .72rem;
+    color: var(--muted);
+    display: flex; align-items: center; gap: .5rem;
+}
 
 /* ---------- File uploader ---------- */
 [data-testid="stFileUploader"] section {
-    background: rgba(255,255,255,.7);
-    border: 1.5px dashed rgba(108, 99, 217, 0.4);
+    background: rgba(255, 255, 255, 0.018);
+    border: 1.5px dashed var(--line-strong);
     border-radius: var(--radius);
-    padding: 1.6rem;
-    transition: all .25s var(--ease);
+    padding: 1.5rem;
+    transition: border-color .25s var(--ease), background .25s var(--ease);
 }
 
 [data-testid="stFileUploader"] section:hover {
-    border-color: var(--violet);
-    background: linear-gradient(135deg, rgba(237,233,255,.8), rgba(223,245,240,.7));
-    transform: translateY(-2px);
+    border-color: var(--gold);
+    background: var(--gold-soft);
 }
 
 [data-testid="stFileUploader"] section span,
@@ -591,153 +586,156 @@ section[data-testid="stSidebar"] small {
 [data-testid="stFileUploader"] section div { color: var(--muted); }
 
 [data-testid="stFileUploader"] section button {
-    background: var(--panel-solid);
-    color: var(--violet-dark);
+    background: var(--panel-2);
+    color: var(--ink);
     border: 1px solid var(--line-strong);
     border-radius: 10px;
     font-weight: 600;
 }
+[data-testid="stFileUploader"] section button:hover { border-color: var(--gold); color: var(--gold); }
 
 [data-testid="stFileUploaderFile"] {
-    background: rgba(255,255,255,.8);
+    background: var(--panel);
+    border: 1px solid var(--line);
     border-radius: 12px;
     padding: .2rem .5rem;
 }
 
 /* ---------- Inputs ---------- */
 .stTextInput input {
-    background: var(--panel-solid) !important;
+    background: var(--panel) !important;
     border: 1px solid var(--line-strong) !important;
-    border-radius: 14px !important;
+    border-radius: 12px !important;
     color: var(--text) !important;
-    padding: .85rem 1.1rem !important;
-    box-shadow: var(--shadow-sm);
+    padding: .8rem 1rem !important;
     transition: border-color .2s, box-shadow .2s;
 }
 
 .stTextInput input::placeholder { color: var(--muted) !important; opacity: 1 !important; }
 
 .stTextInput input:focus {
-    border-color: var(--violet) !important;
-    box-shadow: 0 0 0 4px rgba(108, 99, 217, 0.15) !important;
+    border-color: var(--gold) !important;
+    box-shadow: 0 0 0 3px rgba(230, 185, 106, 0.18) !important;
 }
 
 .stTextInput label p, .stSelectbox label p, .stFileUploader label p {
     font-weight: 600;
-    font-size: .88rem;
+    font-size: .86rem;
     color: var(--ink);
 }
 
 div[data-baseweb="select"] > div {
-    background: var(--panel-solid);
+    background: var(--panel);
     border-color: var(--line-strong);
-    border-radius: 14px;
+    border-radius: 12px;
     color: var(--text);
     min-height: 46px;
-    box-shadow: var(--shadow-sm);
     transition: border-color .2s, box-shadow .2s;
 }
 
-div[data-baseweb="select"] > div:hover { border-color: var(--violet); }
+div[data-baseweb="select"] > div:hover { border-color: var(--gold-deep); }
 div[data-baseweb="select"] > div:focus-within {
-    border-color: var(--violet);
-    box-shadow: 0 0 0 4px rgba(108, 99, 217, 0.15);
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(230, 185, 106, 0.18);
 }
 
 div[data-baseweb="select"] span,
 div[data-baseweb="select"] input { color: var(--text) !important; }
+div[data-baseweb="select"] svg { fill: var(--muted); }
 
-/* Dropdown menus */
 div[data-baseweb="popover"] > div {
-    border-radius: 14px;
-    border: 1px solid var(--line);
-    box-shadow: 0 20px 44px -18px rgba(60, 48, 120, 0.4);
+    border-radius: 12px;
+    border: 1px solid var(--line-strong);
+    box-shadow: 0 22px 44px -18px rgba(0, 0, 0, 0.8);
     overflow: hidden;
+    background: var(--panel-2);
 }
-div[data-baseweb="popover"] ul { background: var(--panel-solid); padding: .3rem; }
-div[data-baseweb="popover"] li { border-radius: 10px; color: var(--text); transition: background .15s; }
+div[data-baseweb="popover"] ul { background: var(--panel-2); padding: .3rem; }
+div[data-baseweb="popover"] li { border-radius: 8px; color: var(--text); transition: background .15s; }
 div[data-baseweb="popover"] li:hover,
-div[data-baseweb="popover"] li[aria-selected="true"] { background: var(--lilac); }
+div[data-baseweb="popover"] li[aria-selected="true"] { background: var(--panel-3); }
 
 /* ---------- Buttons ---------- */
 .stButton > button,
 .stDownloadButton > button {
-    border-radius: 12px;
+    border-radius: 11px;
     border: 1px solid var(--line-strong);
-    background: var(--panel-solid);
+    background: var(--panel-2);
     color: var(--ink);
     font-weight: 600;
-    padding: .6rem 1.4rem;
+    padding: .55rem 1.3rem;
     box-shadow: var(--shadow-sm);
-    transition: transform .2s var(--ease), box-shadow .2s var(--ease), border-color .2s, background .2s;
+    transition: transform .2s var(--ease), border-color .2s, background .2s, box-shadow .2s;
 }
 
 .stButton > button:hover,
 .stDownloadButton > button:hover {
-    border-color: var(--violet);
-    background: #FFFFFF;
-    transform: translateY(-2px);
-    box-shadow: 0 12px 22px -14px rgba(79, 70, 184, 0.55);
+    border-color: var(--gold);
+    background: var(--panel-3);
+    transform: translateY(-1px);
 }
 
-.stButton > button:active, .stDownloadButton > button:active { transform: translateY(0) scale(.98); }
+.stButton > button:active, .stDownloadButton > button:active { transform: translateY(0) scale(.985); }
 
 .stButton > button:hover p,
-.stDownloadButton > button:hover p { color: var(--violet-dark); }
+.stDownloadButton > button:hover p { color: var(--gold); }
 
 .stButton > button:focus-visible, .stDownloadButton > button:focus-visible {
-    outline: 3px solid rgba(108, 99, 217, .35);
+    outline: 3px solid rgba(230, 185, 106, .35);
     outline-offset: 2px;
 }
 
 .stButton > button[kind="primary"],
 .stButton > button[data-testid="stBaseButton-primary"] {
-    background: linear-gradient(135deg, #7C6FF0 0%, #5B63DC 55%, #4C8FD9 100%);
-    border: none;
-    color: #FFFFFF;
-    box-shadow: 0 14px 26px -14px rgba(91, 99, 220, 0.9);
+    background: linear-gradient(180deg, #EBC67D 0%, #D7A653 100%);
+    border: 1px solid #F0CF8F;
+    color: #1B1406;
+    box-shadow: 0 10px 22px -12px rgba(230, 185, 106, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
 .stButton > button[kind="primary"] p,
-.stButton > button[data-testid="stBaseButton-primary"] p { color: #FFFFFF; }
+.stButton > button[data-testid="stBaseButton-primary"] p { color: #1B1406; font-weight: 700; }
 
 .stButton > button[kind="primary"]:hover,
 .stButton > button[data-testid="stBaseButton-primary"]:hover {
-    filter: brightness(1.07);
-    background: linear-gradient(135deg, #7C6FF0 0%, #5B63DC 55%, #4C8FD9 100%);
-    box-shadow: 0 18px 30px -14px rgba(91, 99, 220, 1);
+    filter: brightness(1.06);
+    background: linear-gradient(180deg, #EBC67D 0%, #D7A653 100%);
+    border-color: #F5D99D;
 }
 
 .stButton > button[kind="primary"]:hover p,
-.stButton > button[data-testid="stBaseButton-primary"]:hover p { color: #FFFFFF; }
+.stButton > button[data-testid="stBaseButton-primary"]:hover p { color: #1B1406; }
 
 /* ---------- Tabs ---------- */
 .stTabs [data-baseweb="tab-list"] {
-    gap: .3rem;
-    background: rgba(108, 99, 217, 0.08);
-    padding: .35rem;
-    border-radius: 16px;
-    box-shadow: inset 0 0 0 1px var(--line);
+    gap: .25rem;
+    background: var(--panel);
+    padding: .3rem;
+    border-radius: 13px;
+    border: 1px solid var(--line);
+    width: fit-content;
+    max-width: 100%;
     overflow-x: auto;
 }
 
 .stTabs [data-baseweb="tab"] {
-    border-radius: 12px;
-    padding: .55rem 1.2rem;
+    border-radius: 9px;
+    padding: .5rem 1.05rem;
     color: var(--muted);
     font-weight: 600;
+    font-size: .88rem;
     transition: background .2s, color .2s;
 }
 
-.stTabs [data-baseweb="tab"]:hover { background: rgba(255, 255, 255, 0.65); }
+.stTabs [data-baseweb="tab"]:hover { background: var(--panel-2); color: var(--ink); }
 
 .stTabs [aria-selected="true"] {
-    background: var(--panel-solid) !important;
-    box-shadow: 0 8px 18px -10px rgba(79, 70, 184, 0.55);
+    background: var(--gold-soft) !important;
+    box-shadow: inset 0 0 0 1px var(--gold-line);
 }
 
 .stTabs [aria-selected="true"],
-.stTabs [aria-selected="true"] p { color: var(--violet-dark) !important; }
+.stTabs [aria-selected="true"] p { color: var(--gold) !important; }
 
 .stTabs [data-baseweb="tab-highlight"],
 .stTabs [data-baseweb="tab-border"] { display: none; }
@@ -746,65 +744,69 @@ div[data-baseweb="popover"] li[aria-selected="true"] { background: var(--lilac);
 
 /* ---------- Alerts, expanders, metrics, chat ---------- */
 [data-testid="stAlert"] {
-    border-radius: 14px;
+    border-radius: 12px;
     border: 1px solid var(--line);
-    box-shadow: var(--shadow-sm);
 }
 
 [data-testid="stExpander"] {
     background: var(--panel);
     border: 1px solid var(--line);
-    border-radius: 16px;
+    border-radius: 14px;
     box-shadow: var(--shadow-sm);
     overflow: hidden;
-    transition: box-shadow .25s var(--ease);
 }
-[data-testid="stExpander"]:hover { box-shadow: var(--shadow); }
+
+[data-testid="stExpander"] details { border: none; }
 
 [data-testid="stExpander"] summary,
 [data-testid="stExpander"] summary span,
 [data-testid="stExpander"] summary p { color: var(--ink); font-weight: 600; }
 
-[data-testid="stExpander"] summary:hover { background: rgba(237, 233, 255, .5); }
+[data-testid="stExpander"] summary:hover { background: var(--panel-2); }
 
 [data-testid="stExpander"] pre,
-[data-testid="stText"] { background: var(--panel-2); color: var(--text); border-radius: 10px; }
+[data-testid="stText"] { background: var(--bg-soft); color: var(--text); border-radius: 10px; }
 
 [data-testid="stMetric"] {
     background: var(--panel);
-    border: 1px solid rgba(255,255,255,.9);
-    border-radius: 16px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
     padding: 1rem 1.2rem;
-    box-shadow: var(--shadow-sm), inset 0 0 0 1px var(--line);
+    box-shadow: var(--shadow-sm);
 }
 
 [data-testid="stMetricValue"] { color: var(--ink); font-family: var(--font-display); }
 
+div[data-testid="stProgress"] > div > div { background: var(--track); }
 div[data-testid="stProgress"] > div > div > div > div {
-    background: linear-gradient(90deg, #8B7CF6, #3DB8A4);
+    background: linear-gradient(90deg, var(--gold-deep), var(--gold));
     border-radius: 999px;
 }
 
 [data-testid="stChatMessage"] {
     background: var(--panel);
-    border: 1px solid rgba(255,255,255,.9);
-    border-radius: 18px;
-    box-shadow: var(--shadow-sm), inset 0 0 0 1px var(--line);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: var(--shadow-sm);
     padding: 1rem 1.2rem;
 }
 
+[data-testid="stBottom"] > div { background: transparent; }
+
 div[data-testid="stChatInput"] {
-    background: var(--panel-solid);
-    border-radius: 18px;
+    background: var(--panel);
+    border-radius: 16px;
     border: 1px solid var(--line-strong);
     box-shadow: var(--shadow);
 }
 
+div[data-testid="stChatInput"]:focus-within { border-color: var(--gold); }
+
 div[data-testid="stChatInput"] textarea {
     color: var(--text) !important;
     -webkit-text-fill-color: var(--text) !important;
-    caret-color: var(--violet) !important;
-    background-color: var(--panel-solid) !important;
+    caret-color: var(--gold) !important;
+    background-color: var(--panel) !important;
 }
 
 div[data-testid="stChatInput"] textarea::placeholder {
@@ -821,16 +823,12 @@ div[data-testid="stChatInput"] textarea:focus {
 /* ---------- Insights dashboard ---------- */
 .dash-card {
     background: var(--panel);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,.9);
-    border-radius: 20px;
-    padding: 1.4rem 1.5rem;
-    box-shadow: var(--shadow), inset 0 0 0 1px var(--line);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 1.35rem 1.5rem;
+    box-shadow: var(--shadow);
     margin-bottom: 1rem;
-    transition: transform .3s var(--ease), box-shadow .3s var(--ease);
 }
-.dash-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg), inset 0 0 0 1px var(--line-strong); }
 
 .gauge-card { text-align: center; }
 
@@ -845,13 +843,13 @@ div[data-testid="stChatInput"] textarea:focus {
 .gauge-inner {
     width: 122px; height: 122px;
     border-radius: 50%;
-    background: var(--panel-solid);
+    background: var(--panel);
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
     box-shadow: inset 0 0 0 1px var(--line);
 }
 
-.gauge-inner .gv { font-family: var(--font-display); font-size: 2.3rem; font-weight: 600; line-height: 1; color: var(--ink); }
+.gauge-inner .gv { font-family: var(--font-display); font-size: 2.2rem; font-weight: 700; line-height: 1; color: var(--ink); }
 .gauge-inner small { color: var(--muted); font-size: .75rem; margin-top: .2rem; }
 .gauge-status { font-weight: 700; font-size: 1.1rem; }
 .gauge-label { color: var(--muted); font-size: .85rem; }
@@ -860,7 +858,7 @@ div[data-testid="stChatInput"] textarea:focus {
 .dim-top { display: flex; justify-content: space-between; font-size: .9rem; margin-bottom: .3rem; color: var(--text); }
 
 .dim-track {
-    height: 9px;
+    height: 8px;
     border-radius: 999px;
     background: var(--track);
     overflow: hidden;
@@ -870,23 +868,23 @@ div[data-testid="stChatInput"] textarea:focus {
     height: 100%;
     border-radius: 999px;
     transform-origin: left center;
-    animation: growX 1.1s var(--ease) both;
+    animation: growX 1s var(--ease) both;
 }
 
 .risk-row {
     background: var(--panel);
     border: 1px solid var(--line);
-    border-left: 4px solid var(--rose);
-    border-radius: 14px;
-    padding: .9rem 1.1rem;
-    margin-bottom: .7rem;
+    border-left: 3px solid var(--rose);
+    border-radius: 12px;
+    padding: .85rem 1.05rem;
+    margin-bottom: .65rem;
     box-shadow: var(--shadow-sm);
-    transition: transform .25s var(--ease), box-shadow .25s var(--ease);
+    transition: border-color .25s var(--ease);
 }
-.risk-row:hover { transform: translateX(4px); box-shadow: var(--shadow); }
+.risk-row:hover { border-color: var(--line-strong); border-left-color: var(--rose); }
 
-.risk-row .risk-title { font-weight: 700; font-size: .93rem; color: #B63F57; margin-bottom: .25rem; }
-.risk-row .risk-ev { color: var(--text); font-size: .9rem; line-height: 1.55; }
+.risk-row .risk-title { font-weight: 700; font-size: .92rem; color: #FF8A95; margin-bottom: .25rem; }
+.risk-row .risk-ev { color: var(--text); font-size: .88rem; line-height: 1.55; }
 
 .legend {
     display: flex; flex-wrap: wrap; gap: .4rem .9rem;
@@ -897,7 +895,8 @@ div[data-testid="stChatInput"] textarea:focus {
 .legend i { width: 10px; height: 10px; border-radius: 4px; display: inline-block; }
 
 .dash-title {
-    font-size: 1.02rem;
+    font-family: var(--font-display);
+    font-size: 1rem;
     font-weight: 700;
     margin: .4rem 0 .8rem;
     color: var(--ink);
@@ -906,37 +905,34 @@ div[data-testid="stChatInput"] textarea:focus {
 .kpi-card {
     position: relative;
     overflow: hidden;
-    background: linear-gradient(160deg, #FFFFFF 0%, #F5F2FF 100%);
-    border: 1px solid rgba(255,255,255,.9);
-    border-radius: 18px;
-    padding: 1.15rem 1.3rem;
-    box-shadow: var(--shadow), inset 0 0 0 1px var(--line);
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 1.1rem 1.3rem;
+    box-shadow: var(--shadow);
     margin-bottom: 1rem;
-    transition: transform .3s var(--ease), box-shadow .3s var(--ease);
 }
-.kpi-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg), inset 0 0 0 1px var(--line-strong); }
 
 .kpi-card::before {
     content: "";
     position: absolute;
-    right: -30px; top: -30px;
-    width: 110px; height: 110px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(139,124,246,.28), transparent 70%);
+    left: 0; right: 0; top: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold), transparent 70%);
 }
 
 .kpi-label {
-    font-size: .72rem;
+    font-size: .7rem;
     font-weight: 700;
-    letter-spacing: .08em;
+    letter-spacing: .1em;
     text-transform: uppercase;
     color: var(--muted);
 }
 
 .kpi-value {
     font-family: var(--font-display);
-    font-size: 2rem;
-    font-weight: 600;
+    font-size: 1.9rem;
+    font-weight: 700;
     color: var(--ink);
     margin: .35rem 0;
 }
@@ -945,7 +941,7 @@ div[data-testid="stChatInput"] textarea:focus {
 
 .level-badge {
     display: inline-block;
-    font-size: .92rem;
+    font-size: .9rem;
     font-weight: 700;
     letter-spacing: .06em;
     padding: .22rem .85rem;
@@ -959,7 +955,7 @@ div[data-testid="stChatInput"] textarea:focus {
 }
 
 .chip {
-    font-size: .8rem;
+    font-size: .78rem;
     font-weight: 600;
     padding: .3rem .9rem;
     border-radius: 999px;
@@ -977,35 +973,33 @@ div[data-testid="stChatInput"] textarea:focus {
 
 .factor-top {
     display: flex; justify-content: space-between;
-    font-size: .92rem; font-weight: 600;
+    font-size: .9rem; font-weight: 600;
     margin-bottom: .4rem; color: var(--text);
 }
 
 /* ---------- Scrollbars ---------- */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-thumb { background: rgba(108, 99, 217, .25); border-radius: 999px; border: 2px solid transparent; background-clip: content-box; }
-::-webkit-scrollbar-thumb:hover { background: rgba(108, 99, 217, .45); background-clip: content-box; border: 2px solid transparent; }
+::-webkit-scrollbar-thumb { background: rgba(147, 162, 255, .22); border-radius: 999px; border: 2px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background: rgba(230, 185, 106, .5); background-clip: content-box; border: 2px solid transparent; }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 1000px) {
-    .topnav nav { display: none; }
-    .stApp .hero h1 { font-size: 2.3rem; }
+    .ov-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .stApp .page-head h1 { font-size: 2rem; }
 }
 
 @media (max-width: 800px) {
     .radar-wrap { grid-template-columns: 1fr; }
     .block-container { padding-left: 1rem; padding-right: 1rem; }
-    .hero { padding: 1.8rem 1.4rem; border-radius: 22px; }
-    .stApp .hero h1 { font-size: 1.85rem; }
-    .stApp .hero p { font-size: .97rem; }
+    .stApp .page-head h1 { font-size: 1.7rem; }
     .section-head { margin-top: 2.2rem; gap: .8rem; }
-    .stApp .section-head h2 { font-size: 1.3rem; }
-    .section-head .icon { width: 40px; height: 40px; border-radius: 13px; }
-    .topnav { padding-left: .8rem; }
+    .stApp .section-head h2 { font-size: 1.2rem; }
+    .section-head .icon { width: 40px; height: 40px; }
+    .topbar .status-row .status-pill:nth-child(2) { display: none; }
 }
 
 @media (max-width: 520px) {
-    .topnav .live { display: none; }
+    .ov-grid { grid-template-columns: 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1164,6 +1158,49 @@ def unique_risk_records(risks):
     return records
 
 
+def risk_meta_pills(risk, compact=False):
+    """
+    Pills for the extra fields of the improved risk agent: confidence,
+    likelihood / impact / status when the document states them, and where
+    the risk came from. Missing fields are simply left out (older saved
+    results have none of them).
+    """
+
+    def level_text(value):
+        return f"{value}/5" if isinstance(value, int) else None
+
+    pills = []
+
+    confidence = risk.get("confidence")
+    if confidence:
+        pills.append(("pill", f"Confidence: {confidence}"))
+
+    if not compact:
+        for label, key in (("Likelihood", "likelihood"), ("Impact", "impact")):
+            text = level_text(risk.get(key))
+            if text:
+                pills.append(("pill", f"{label}: {text} (stated)"))
+
+    if risk.get("mitigation_status"):
+        pills.append(("pill", f"Status: {risk['mitigation_status']}"))
+
+    source_document = risk.get("source_document")
+    source_line = risk.get("source_line")
+    if source_document or (not compact and source_line):
+        place = source_document or "original document"
+        if source_line and not compact:
+            place += f" · line {source_line}"
+        pills.append(("pill source", f"Source: {place}"))
+
+    also = risk.get("also_found_in")
+    if also and not compact and isinstance(also, (list, tuple)):
+        pills.append(("pill source", "Also in: " + ", ".join(str(a) for a in also)))
+
+    return "".join(
+        f'<span class="{css}">{esc(text)}</span>' for css, text in pills
+    )
+
+
 def risk_row_html(risk):
     """Compact HTML row for one risk record."""
 
@@ -1182,7 +1219,7 @@ def risk_row_html(risk):
         f'<div class="risk-title">{esc(risk.get("risk_id", "–"))} · '
         f'{esc(risk.get("risk_type", "Unknown"))}</div>'
         f'<div class="risk-ev">{esc(evidence)}</div>'
-        f'{pills}</div>'
+        f'{pills}{risk_meta_pills(risk, compact=True)}</div>'
     )
 
 
@@ -1221,21 +1258,156 @@ def render_sidebar_stats(slot):
     )
 
 
+
+# --------------------------------------------------
+# ICONS (inline SVG, UI only)
+# --------------------------------------------------
+
+_ICON_PATHS = {
+    "brand": '<rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/><path d="M10 6.5h2.5a2 2 0 0 1 2 2V14"/>',
+    "overview": '<path d="M3 13a9 9 0 1 1 18 0"/><path d="M12 13l4-4"/>',
+    "docs": '<rect x="8" y="3" width="12" height="14" rx="2"/><path d="M16 21H6a2 2 0 0 1-2-2V8"/>',
+    "upload": '<path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/>',
+    "update": '<path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/>',
+    "target": '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2"/>',
+    "shield": '<path d="M12 3l8 3v6c0 4.5-3.2 7.6-8 9-4.8-1.4-8-4.5-8-9V6z"/>',
+    "tasks": '<path d="M10 6h10M10 12h10M10 18h10"/><path d="M3.5 6l1.5 1.5L7.5 5M3.5 12l1.5 1.5 2.5-2.5M3.5 18l1.5 1.5 2.5-2.5"/>',
+    "write": '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>',
+    "heart": '<path d="M19 14c1.5-1.5 2-3 2-4.5A4.5 4.5 0 0 0 12 7a4.5 4.5 0 0 0-9 2.5c0 4.5 6 9 9 11 1.4-.9 3.2-2.3 4.8-4"/><path d="M3 12h4l2-3 3 6 2-3h2"/>',
+    "chat": '<path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.2A8 8 0 1 1 21 12z"/>',
+    "chart": '<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>',
+    "pulse": '<path d="M3 12h4l3-8 4 16 3-8h4"/>',
+    "settings": '<circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3.9a7 7 0 0 0-2-1.2L14.3 3h-4.6l-.4 2.6a7 7 0 0 0-2 1.2l-2.3-.9-2 3.4 2 1.5a7 7 0 0 0 0 2.4l-2 1.5 2 3.4 2.3-.9a7 7 0 0 0 2 1.2l.4 2.6h4.6l.4-2.6a7 7 0 0 0 2-1.2l2.3.9 2-3.4-2-1.5c.1-.4.1-.8.1-1.2z"/>',
+    "book": '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M9 7h6"/>',
+    "alert": '<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.01"/>',
+    "check": '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/>',
+    "box": '<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/>',
+    "lock": '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+}
+
+
+def icon(name, size=18):
+    return (
+        f'<svg class="ic" width="{size}" height="{size}" viewBox="0 0 24 24" '
+        'fill="none" stroke="currentColor" stroke-width="1.8" '
+        'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+        f'{_ICON_PATHS.get(name, "")}</svg>'
+    )
+
+
+def nav_link(href, icon_name, label):
+    return f'<a href="#{href}" target="_self">{icon(icon_name)}<span>{esc(label)}</span></a>'
+
+
+def overview_tile(icon_name, tone, label, value, sub):
+    return (
+        f'<div class="ov-card {tone}"><div class="ov-ico">{icon(icon_name, 17)}</div>'
+        f'<span class="ov-label">{esc(label)}</span>'
+        f'<span class="ov-value">{esc(value)}</span>'
+        f'<span class="ov-sub">{esc(sub)}</span></div>'
+    )
+
+
+def render_overview(slot):
+    """Read-only summary of what is already in session state."""
+
+    state = st.session_state
+
+    def count_of(container, key):
+        if isinstance(container, dict):
+            value = container.get(key)
+            return len(value) if isinstance(value, (list, tuple)) else 0
+        return 0
+
+    documents = len(state.processed_documents)
+
+    risks = (
+        str(len(unique_risk_records(state.risk_results)))
+        if state.risk_results is not None else "—"
+    )
+    blockers = (
+        str(count_of(state.blocker_results, "blockers"))
+        if state.blocker_results is not None else "—"
+    )
+    actions = (
+        str(count_of(state.blocker_results, "action_items"))
+        if state.blocker_results is not None else "—"
+    )
+    deliverables = (
+        str(count_of(state.scope_results, "deliverables"))
+        if state.scope_results is not None else "—"
+    )
+
+    health_value, health_sub = "—", "Calculate in Project Health"
+    if isinstance(state.health_results, dict):
+        health_value = f'{state.health_results.get("overall_score", 0)} / 100'
+        health_sub = str(state.health_results.get("status", ""))
+        assessed_dims = state.health_results.get("assessed_dimensions")
+
+        if isinstance(assessed_dims, int) and assessed_dims < 5:
+            health_sub += f" · {assessed_dims}/5 assessed"
+
+    docs_value, docs_sub = "—", "Generate in Documentation tab"
+    generated = state.documentation_results
+    if isinstance(generated, dict):
+        extra = generated.get("action_items", {})
+        docs_value = str(
+            len(generated.get("user_stories", []) or [])
+            + len(generated.get("risk_register", []) or [])
+            + sum(
+                len(v) for v in extra.values() if isinstance(v, (list, tuple))
+            ) if isinstance(extra, dict) else
+            len(generated.get("user_stories", []) or [])
+            + len(generated.get("risk_register", []) or [])
+        )
+        docs_sub = "Stories, risks and actions"
+
+    slot.markdown(
+        '<div class="ov-grid">'
+        + overview_tile("docs", "", "Documents processed", documents, "Indexed this session")
+        + overview_tile("box", "teal", "Chunks stored", state.total_chunks, "In the vector store")
+        + overview_tile("shield", "gold", "Identified risks", risks, "Risk detection findings")
+        + overview_tile("alert", "rose", "Total blockers", blockers, "From blocker analysis")
+        + overview_tile("check", "", "Action items", actions, "Pending follow-ups")
+        + overview_tile("target", "teal", "Deliverables", deliverables, "Scope agent output")
+        + overview_tile("heart", "amber", "Project health", health_value, health_sub)
+        + overview_tile("write", "gold", "Generated documentation", docs_value, docs_sub)
+        + "</div>",
+        unsafe_allow_html=True,
+    )
+
+
 with st.sidebar:
     st.markdown(
-        """
-        <div class="side-brand">
-            <div class="mark">◆</div>
-            <div>
-                <div class="name">Project Intelligence</div>
-                <div class="tag">Your documents, searched and analyzed.</div>
-            </div>
-        </div>
-        """,
+        '<div class="side-brand"><div class="mark">' + icon("brand", 20) + '</div>'
+        '<div><span class="name">Project Intelligence</span>'
+        '<span class="tag">Intelligence platform</span></div></div>',
         unsafe_allow_html=True,
     )
     st.divider()
-    st.markdown('<div class="side-label">Overview</div>', unsafe_allow_html=True)
+
+    st.markdown(
+        '<div class="side-label">Workspace</div><div class="nav">'
+        + nav_link("overview", "overview", "Overview")
+        + nav_link("document-ingestion", "upload", "Document upload")
+        + nav_link("add-updates", "update", "Incremental upload")
+        + '</div>'
+        '<div class="side-label">Project intelligence</div><div class="nav">'
+        + nav_link("project-intelligence-agents", "target", "Scope & Deliverables")
+        + nav_link("project-intelligence-agents", "shield", "Risk Intelligence")
+        + nav_link("project-intelligence-agents", "tasks", "Blockers & Actions")
+        + nav_link("milestone-3-project-intelligence", "write", "Documentation generation")
+        + nav_link("milestone-3-project-intelligence", "heart", "Project health")
+        + nav_link("milestone-3-project-intelligence", "chat", "Project assistant")
+        + '</div>'
+        '<div class="side-label">Analytics & insights</div><div class="nav">'
+        + nav_link("milestone-4-insights-dashboard", "chart", "Project insights")
+        + '</div>',
+        unsafe_allow_html=True,
+    )
+
+    st.divider()
+    st.markdown('<div class="side-label">At a glance</div>', unsafe_allow_html=True)
 
     sidebar_stats_slot = st.empty()
     render_sidebar_stats(sidebar_stats_slot)
@@ -1257,7 +1429,9 @@ with st.sidebar:
         + _step(st.session_state.scope_results is not None, "Scope & deliverables")
         + _step(st.session_state.risk_results is not None, "Risk detection")
         + _step(st.session_state.blocker_results is not None, "Blockers & actions")
-        + "</div>",
+        + "</div>"
+        '<div class="side-status">' + icon("pulse") + '<span class="grow">Workspace ready</span><i></i></div>'
+        '<div class="side-foot">' + icon("lock", 14) + 'Local-first project workspace</div>',
         unsafe_allow_html=True,
     )
 
@@ -1267,37 +1441,29 @@ with st.sidebar:
 # --------------------------------------------------
 
 st.markdown(
-    """
-    <div class="topnav">
-        <div class="brand"><span class="mark">◆</span> Project Intelligence</div>
-        <nav>
-            <a href="#document-ingestion" target="_self">Ingest</a>
-            <a href="#add-updates" target="_self">Updates</a>
-            <a href="#project-intelligence-agents" target="_self">Agents</a>
-            <a href="#milestone-3-project-intelligence" target="_self">Generate</a>
-            <a href="#milestone-4-insights-dashboard" target="_self">Dashboard</a>
-        </nav>
-        <span class="live"><i></i> AI analysis ready</span>
-    </div>
-    """,
+    '<div class="topbar" id="overview">'
+    '<div class="crumbs">' + icon("book", 17)
+    + '<span>Project Intelligence</span><b>/</b><strong>Overview</strong></div>'
+    '<div class="status-row">'
+    '<span class="status-pill"><i></i>App running</span>'
+    f'<span class="status-pill"><i></i>{len(st.session_state.processed_documents)} documents indexed</span>'
+    '</div></div>',
     unsafe_allow_html=True,
 )
 
 st.markdown(
     """
-    <div class="hero">
-        <div class="status"><span class="dot"></span> AI analysis ready</div>
+    <div class="page-head">
+        <span class="eyebrow">Workspace</span>
         <h1>AI Project Intelligence &amp; <em>Risk Advisor</em></h1>
         <p>Upload project documents, search their contents, and analyze
         scope, risks, blockers, and action items.</p>
-        <div class="hero-chips">
-            <span>📁 Upload</span><span>🧠 Analyze</span>
-            <span>📈 Insights</span><span>💬 Ask</span>
-        </div>
     </div>
     """,
     unsafe_allow_html=True,
 )
+
+overview_slot = st.empty()
 
 
 # --------------------------------------------------
@@ -1751,7 +1917,9 @@ else:
 
         st.caption(
             "This version detects risks using keywords; "
-            "it does not calculate a reliable delivery-date forecast."
+            "it does not calculate a reliable delivery-date forecast. "
+            "Likelihood, impact and status are shown only when the "
+            "document states them."
         )
 
         if st.button(
@@ -1797,14 +1965,17 @@ else:
                         <div class="card risk">
                             <div class="rtype">Potential Risk: {esc(risk.get('risk_id', ''))} · {esc(risk.get('risk_type', 'Unknown'))}</div>
                             <p><b>Evidence:</b> {esc(risk.get('evidence', 'N/A'))}</p>
-                            {pills}
+                            {pills}{risk_meta_pills(risk)}
                         </div>
                         """,
                         unsafe_allow_html=True,
                     )
 
             else:
-                st.info("No risks matched the current keyword rules.")
+                st.info(
+                    "No risks matched the current keyword rules. "
+                    "This does not prove the project has no risks."
+                )
 
     # ----------------------------------------------
     # AGENT 3: BLOCKERS AND ACTION ITEMS
@@ -2013,6 +2184,13 @@ else:
                     f"{score}/100"
                 )
 
+                assessed_count = health.get("assessed_dimensions")
+
+                if assessed_count is not None:
+                    st.caption(
+                        f"Based on {assessed_count} of 5 assessed dimensions."
+                    )
+
             with col2:
 
                 st.markdown("**Project Status**")
@@ -2020,7 +2198,7 @@ else:
                 if status == "Healthy":
                     st.success(status)
 
-                elif status == "Moderate Risk":
+                elif status in ("Moderate Risk", "High Risk"):
                     st.warning(status)
 
                 elif status == "Critical":
@@ -2028,6 +2206,11 @@ else:
 
                 else:
                     st.info(status)
+
+            # An analysis agent failed or returned unusable output: say so
+            # instead of silently showing a clean score.
+            for agent_error in health.get("agent_errors", []) or []:
+                st.warning(str(agent_error))
 
             st.markdown("---")
 
@@ -2051,6 +2234,14 @@ else:
                     "The project has moderate risks. Review identified "
                     "timeline issues, dependencies, and blockers "
                     "to avoid possible delivery problems."
+                )
+
+            elif status == "High Risk":
+
+                st.warning(
+                    "The project has high risk. Review the identified "
+                    "risks, timeline issues and blockers soon to avoid "
+                    "delivery problems."
                 )
 
             elif status == "Critical":
@@ -2084,6 +2275,12 @@ else:
                 "No timeline risks detected."
             )
 
+            list_card(
+                "Risk Score Findings",
+                assessment.get("risk", []),
+                "No scored risks to report."
+            )
+
             st.markdown("#### 3. Blocker & Dependency Assessment")
 
             list_card(
@@ -2091,6 +2288,18 @@ else:
                 assessment.get("blockers", []),
                 "No blockers or pending decisions detected."
             )
+
+            quality_findings = assessment.get("quality", [])
+
+            if quality_findings:
+
+                st.markdown("#### Quality Assessment")
+
+                list_card(
+                    "Quality Findings",
+                    quality_findings,
+                    "No quality evidence available."
+                )
 
             st.markdown("#### 4. Recommended Actions")
 
@@ -2104,24 +2313,43 @@ else:
             st.markdown("### Health Score Breakdown")
 
             col1, col2, col3 = st.columns(3)
+            col4, col5, _spare = st.columns(3)
 
             score_dimensions = [
-                ("Scope Score", "scope_score", col1),
-                ("Timeline Score", "timeline_score", col2),
-                ("Blocker Score", "blocker_score", col3)
+                ("Scope Score", "scope_score", "scope", col1),
+                ("Timeline Score", "timeline_score", "schedule", col2),
+                ("Risk Score", "risk_score", "risk", col3),
+                ("Quality Score", "quality_score", "quality", col4),
+                ("Blocker Score", "blocker_score", "blocker", col5),
             ]
 
-            for label, key, column in score_dimensions:
+            dimension_info = health.get("dimension_status", {}) or {}
 
-                value = health.get(key, 0)
+            for label, key, status_key, column in score_dimensions:
+
+                value = health.get(key)
+                info = dimension_info.get(status_key) or {}
+                assessed = info.get("assessed", True)
 
                 with column:
 
-                    st.metric(label, f"{value}/100")
+                    # Results saved by an older version may lack a score,
+                    # and a dimension without evidence has no real score.
+                    if value is None or not assessed:
 
-                    st.progress(
-                        max(0, min(int(value), 100)) / 100
-                    )
+                        st.metric(label, "Not assessed")
+                        st.progress(0.0)
+
+                        if info.get("basis"):
+                            st.caption(info["basis"])
+
+                    else:
+
+                        st.metric(label, f"{value}/100")
+
+                        st.progress(
+                            max(0, min(int(value), 100)) / 100
+                        )
 
     # ----------------------------------------------
     # PROJECT ASSISTANT
@@ -2279,6 +2507,8 @@ else:
         detected risks (see health_score.assess_risk_matrix). It does not
         use the overall health score or simply count risks.
         Criticality bands: Low 1-4, Medium 5-9, High 10-16, Critical 17-25.
+        With no detected risks the level is "NONE DETECTED" and the score 0
+        (keyword detection finding nothing is not proof of no risk).
         Returns (likelihood, impact, score, level, color, info).
         """
 
@@ -2325,18 +2555,18 @@ else:
             dash = "" if level == 100 else ' stroke-dasharray="3 3"'
             parts.append(
                 f'<polygon points="{ring}" fill="none" '
-                f'stroke="#E3DFF2" stroke-width="1"{dash}/>'
+                f'stroke="#2A3957" stroke-width="1"{dash}/>'
             )
             parts.append(
                 f'<text x="{cx + 4}" y="{cy - radius * level / 100 + 3:.1f}" '
-                f'font-size="8" fill="#A9A6C2">{level}</text>'
+                f'font-size="8" fill="#5E6C8A">{level}</text>'
             )
 
         for index in range(count):
             x, y = point(index, 100)
             parts.append(
                 f'<line x1="{cx}" y1="{cy}" x2="{x:.1f}" y2="{y:.1f}" '
-                'stroke="#E3DFF2" stroke-width="1"/>'
+                'stroke="#2A3957" stroke-width="1"/>'
             )
 
         shape = " ".join(
@@ -2348,8 +2578,8 @@ else:
         )
 
         parts.append(
-            f'<polygon points="{shape}" fill="rgba(15,143,134,0.22)" '
-            'stroke="#6C63D9" stroke-width="2.5" stroke-linejoin="round"/>'
+            f'<polygon points="{shape}" fill="rgba(230,185,106,0.18)" '
+            'stroke="#E6B96A" stroke-width="2.5" stroke-linejoin="round"/>'
         )
 
         for index, factor in enumerate(factors):
@@ -2357,11 +2587,11 @@ else:
             label, value = factor[0], factor[1]
             assessed = factor[2] if len(factor) > 2 else True
 
-            dot_color = dash_score_color(value) if assessed else "#A9A6C2"
+            dot_color = dash_score_color(value) if assessed else "#5E6C8A"
             x, y = point(index, dash_clamp(value))
             parts.append(
                 f'<circle cx="{x:.1f}" cy="{y:.1f}" r="4.5" '
-                f'fill="{dot_color}" stroke="#FFFFFF" '
+                f'fill="{dot_color}" stroke="#121B2E" '
                 'stroke-width="1.5"/>'
             )
 
@@ -2389,7 +2619,7 @@ else:
 
             parts.append(
                 f'<text x="{lx:.1f}" y="{name_y:.1f}" text-anchor="{anchor}" '
-                f'font-size="12" font-weight="600" fill="#292745">'
+                f'font-size="12" font-weight="600" fill="#D5DDEC">'
                 f'{esc(label)}</text>'
                 f'<text x="{lx:.1f}" y="{score_y:.1f}" text-anchor="{anchor}" '
                 f'font-size="11" font-weight="600" fill="{dot_color}">'
@@ -2398,9 +2628,9 @@ else:
 
         parts.append(
             f'<text x="{cx}" y="{cy + 6}" text-anchor="middle" font-size="26" '
-            f'font-weight="700" fill="#4F46B8" opacity="0.85">{esc(center_value)}</text>'
+            f'font-weight="700" fill="#E6B96A" opacity="0.85">{esc(center_value)}</text>'
             f'<text x="{cx}" y="{cy + 20}" text-anchor="middle" font-size="9" '
-            'fill="#6D6B88">health score</text></svg>'
+            'fill="#8793AE">health score</text></svg>'
         )
 
         return "".join(parts)
@@ -2415,19 +2645,19 @@ else:
 
     def dash_status_color(status_value):
         return {
-            "Healthy": "#2E9E6B",
-            "Moderate Risk": "#D39A1F",
-            "High Risk": "#D9772B",
-            "Critical": "#C2443D",
-        }.get(status_value, "#6C63D9")
+            "Healthy": "#3FD0AE",
+            "Moderate Risk": "#F2B24C",
+            "High Risk": "#F08A4B",
+            "Critical": "#F0626F",
+        }.get(status_value, "#E6B96A")
 
 
     def dash_score_color(value):
         pct = dash_clamp(value)
         return (
-            "#2E9E6B" if pct >= 70
-            else "#D39A1F" if pct >= 40
-            else "#C2443D"
+            "#3FD0AE" if pct >= 70
+            else "#F2B24C" if pct >= 40
+            else "#F0626F"
         )
 
 
@@ -2452,7 +2682,7 @@ else:
             assessed = factor[3] if len(factor) > 3 else True
 
             pct = dash_clamp(value)
-            color = dash_score_color(value) if assessed else "#A9A6C2"
+            color = dash_score_color(value) if assessed else "#5E6C8A"
             score_html = (
                 f'<b style="color:{color}">{int(round(pct))}/100</b>'
                 if assessed else
@@ -2601,10 +2831,13 @@ else:
                     risk_level, risk_level_color, risk_info,
                 ) = dash_risk_matrix(dash_risk_records)
 
-                risk_sub = f"L{risk_likelihood} × I{risk_impact}"
+                if risk_info.get("risk_count", 0) == 0:
+                    risk_sub = "None detected · keyword-based"
+                else:
+                    risk_sub = f"L{risk_likelihood} × I{risk_impact}"
 
-                if risk_info["estimated_count"]:
-                    risk_sub += " · partly estimated"
+                    if risk_info["estimated_count"]:
+                        risk_sub += " · partly estimated"
 
                 kpi_risk.markdown(
                     dash_kpi_card(
@@ -2729,3 +2962,9 @@ else:
                     "No additional recommendations.",
                     "actions"
                 )
+
+
+
+# Fill the overview tiles once the whole run has finished,
+# so they always reflect the latest session state.
+render_overview(overview_slot)
