@@ -116,10 +116,19 @@ html { scroll-behavior: smooth; }
     visibility: hidden;
 }
 
-header[data-testid="stHeader"] { background: transparent; }
+/* Streamlit's fixed header is slimmed down (its toolbar is hidden above) and
+   given a soft backdrop so content scrolling underneath never shows through
+   behind the sticky navbar. The navbar sits directly below it. */
+header[data-testid="stHeader"] {
+    height: var(--st-header-h);
+    min-height: var(--st-header-h);
+    background: rgba(11, 18, 32, 0.88);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
 
 .block-container {
-    padding-top: 1rem;
+    padding-top: calc(var(--st-header-h) + .5rem);
     padding-bottom: 5rem;
     max-width: 1200px;
 }
@@ -165,11 +174,8 @@ hr {
 }
 
 /* ---------- Top bar ---------- */
-[data-testid="stElementContainer"]:has(.topbar) {
-    position: sticky;
-    top: .5rem;
-    z-index: 60;
-}
+/* The breadcrumb / status bar now scrolls with the page; the pill navbar
+   (see "Sticky pill navbar" below) is the sticky element. */
 
 .topbar {
     display: flex;
@@ -982,6 +988,114 @@ div[data-testid="stChatInput"] textarea:focus {
 ::-webkit-scrollbar-thumb { background: rgba(147, 162, 255, .22); border-radius: 999px; border: 2px solid transparent; background-clip: content-box; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(230, 185, 106, .5); background-clip: content-box; border: 2px solid transparent; }
 
+/* ---------- Sticky pill navbar ---------- */
+:root {
+    --st-header-h: 3rem;     /* Streamlit header height (slimmed above) */
+    --navbar-h: 3.25rem;     /* pill navbar height */
+    --section-gap: 3rem;     /* keep equal to .section-head margin-top */
+}
+
+/* Smooth scrolling has to be set on the element that actually scrolls.
+   In Streamlit that is the main container, not <html>. */
+html, body, .stApp,
+[data-testid="stAppViewContainer"], [data-testid="stMain"], section.main {
+    scroll-behavior: smooth;
+}
+
+/* position: sticky only works on the Streamlit wrapper around the markdown
+   (the inner div's parent is only as tall as the div itself). */
+[data-testid="stElementContainer"]:has(.pill-nav),
+.element-container:has(.pill-nav) {
+    position: sticky;
+    top: var(--st-header-h);
+    z-index: 999;
+}
+
+.pill-nav {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    box-sizing: border-box;
+    height: var(--navbar-h);
+    margin: 0 0 .25rem;
+    padding: 0 .6rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    border-radius: var(--radius);
+    background: rgba(15, 23, 41, 0.9);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--line);
+    box-shadow: 0 12px 30px -20px rgba(0, 0, 0, 0.8);
+}
+.pill-nav::-webkit-scrollbar { display: none; }
+
+.stApp .pill-nav a {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    padding: .46rem 1rem;
+    border-radius: 999px;
+    border: 1px solid var(--line-strong);
+    background: var(--panel);
+    color: var(--muted) !important;
+    font-size: .82rem;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    text-decoration: none !important;
+    cursor: pointer;
+    transition:
+        background .22s var(--ease),
+        border-color .22s var(--ease),
+        color .22s var(--ease),
+        transform .22s var(--ease),
+        box-shadow .22s var(--ease);
+}
+
+.stApp .pill-nav a:hover,
+.stApp .pill-nav a:focus-visible {
+    background: var(--gold-soft);
+    border-color: var(--gold-line);
+    color: var(--gold) !important;
+    transform: translateY(-1px);
+    outline: none;
+}
+.stApp .pill-nav a:focus-visible { box-shadow: 0 0 0 2px var(--gold-line); }
+
+.stApp .pill-nav a:active {
+    transform: translateY(0) scale(.97);
+    background: rgba(230, 185, 106, 0.2);
+}
+
+/* ---------- Section anchors ---------- */
+/* A 1px target placed directly above a section. Its -1px bottom margin keeps
+   the layout identical to before, and scroll-margin-top lifts the scroll
+   position so the section title lands just under the sticky navbar. */
+.agent-anchor {
+    display: block;
+    height: 1px;
+    margin: 0 0 -1px;
+    padding: 0;
+    pointer-events: none;
+    scroll-margin-top: calc(var(--st-header-h) + var(--navbar-h) + 1rem - var(--section-gap));
+}
+
+/* Anchor with no section heading after it (placeholder state). */
+.agent-anchor--flat {
+    scroll-margin-top: calc(var(--st-header-h) + var(--navbar-h) + 1rem);
+}
+[data-testid="stElementContainer"]:has(.agent-anchor--flat) { margin-bottom: -1rem; }
+
+.topbar { scroll-margin-top: calc(var(--st-header-h) + var(--navbar-h) + 1rem); }
+
+@media (max-width: 800px) {
+    :root { --section-gap: 2.2rem; --navbar-h: 3rem; }   /* 2.2rem = mobile .section-head margin-top */
+    .stApp .pill-nav a { padding: .42rem .85rem; font-size: .78rem; }
+}
+
 /* ---------- Responsive ---------- */
 @media (max-width: 1000px) {
     .ov-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1046,15 +1160,64 @@ def esc(value):
     return html.escape(str(value))
 
 
-def section_header(icon, title, subtitle):
+def nav_anchor(anchor_id, flat=False):
+    """Invisible scroll target used by the pill navbar."""
+    css_class = "agent-anchor agent-anchor--flat" if flat else "agent-anchor"
+    return f'<div id="{esc(anchor_id)}" class="{css_class}"></div>'
+
+
+def section_header(icon, title, subtitle, anchor_id=None):
     anchor = re.sub(r"[^a-z0-9]+", "-", str(title).lower()).strip("-")
+    anchor_html = nav_anchor(anchor_id) if anchor_id else ""
     st.markdown(
         f"""
+        {anchor_html}
         <div class="section-head" id="{anchor}">
             <div class="icon">{icon}</div>
             <div><h2>{esc(title)}</h2><span class="sub">{esc(subtitle)}</span></div>
         </div>
         """,
+        unsafe_allow_html=True,
+    )
+
+
+# Sticky pill navbar: edit this list to add, remove or rename pills.
+# (anchor id, icon, label). Each id must match an anchor_id passed to
+# section_header() (or an existing element id such as "overview").
+NAV_ITEMS = [
+    ("overview",            "🏠", "Overview"),
+    ("nav-ingestion",       "📁", "Ingestion"),
+    ("nav-updates",         "🔄", "Updates"),
+    ("nav-analysis-agents", "🎯", "Scope · Risk · Blockers"),
+    ("nav-insight-agents",  "🚀", "Docs · Health · Chat"),
+    ("nav-dashboard",       "📈", "Dashboard"),
+]
+
+
+def render_navbar():
+    links = "".join(
+        f'<a href="#{anchor}" target="_self">{icon} {esc(label)}</a>'
+        for anchor, icon, label in NAV_ITEMS
+    )
+
+    # Highlights the pill of the section currently targeted by the URL hash
+    # (pure CSS, no JavaScript needed).
+    active_selectors = ",".join(
+        f'.stApp:has(#{anchor}:target) .pill-nav a[href="#{anchor}"]'
+        for anchor, _, _ in NAV_ITEMS
+    )
+    active_css = (
+        f"<style>{active_selectors}{{"
+        "background:var(--gold);border-color:var(--gold);"
+        "color:#1B1406 !important;"
+        "box-shadow:0 6px 16px -8px rgba(230,185,106,.55);}</style>"
+    )
+
+    st.markdown(
+        active_css
+        + '<div class="pill-nav" role="navigation" aria-label="Jump to section">'
+        + links
+        + "</div>",
         unsafe_allow_html=True,
     )
 
@@ -1440,6 +1603,8 @@ with st.sidebar:
 # HERO
 # --------------------------------------------------
 
+render_navbar()
+
 st.markdown(
     '<div class="topbar" id="overview">'
     '<div class="crumbs">' + icon("book", 17)
@@ -1470,7 +1635,12 @@ overview_slot = st.empty()
 # MODULE 1: DOCUMENT INGESTION
 # --------------------------------------------------
 
-section_header("📁", "Document ingestion", "Upload PDF, Word, CSV, or text files")
+section_header(
+    "📁",
+    "Document ingestion",
+    "Upload PDF, Word, CSV, or text files",
+    anchor_id="nav-ingestion",
+)
 
 uploaded_files = st.file_uploader(
     "Upload project documents",
@@ -1586,7 +1756,8 @@ st.session_state.setdefault("failed_update_hashes", [])
 section_header(
     "🔄",
     "Add updates",
-    "Add meeting notes or progress updates; the knowledge base updates automatically"
+    "Add meeting notes or progress updates; the knowledge base updates automatically",
+    anchor_id="nav-updates",
 )
 
 NEW_DOCUMENT_OPTION = "➕ Keep as a separate document"
@@ -1824,12 +1995,21 @@ else:
 section_header(
     "🧠",
     "Project intelligence agents",
-    "Scope, risks, blockers, and next steps"
+    "Scope, risks, blockers, and next steps",
+    anchor_id="nav-analysis-agents",
 )
 
 processed_documents = st.session_state.processed_documents
 
 if not processed_documents:
+
+    # Those sections only render once a document is processed; keep their
+    # navbar pills working by pointing them at this message meanwhile.
+    st.markdown(
+        nav_anchor("nav-insight-agents", flat=True)
+        + nav_anchor("nav-dashboard", flat=True),
+        unsafe_allow_html=True,
+    )
 
     st.info("Upload and process a document above to use the agents.")
 
@@ -2040,7 +2220,8 @@ else:
     section_header(
         "🚀",
         "Milestone 3: Project Intelligence",
-        "Generate documentation, assess project health, and ask questions"
+        "Generate documentation, assess project health, and ask questions",
+        anchor_id="nav-insight-agents",
     )
 
     tab_docs, tab_health, tab_chat = st.tabs([
@@ -2496,7 +2677,8 @@ else:
     section_header(
         "📈",
         "Milestone 4: Insights dashboard",
-        "Project health at a glance"
+        "Project health at a glance",
+        anchor_id="nav-dashboard",
     )
 
     from health_score import assess_risk_matrix
